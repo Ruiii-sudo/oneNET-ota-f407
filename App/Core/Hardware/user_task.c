@@ -10,6 +10,8 @@
 #include "XPT2046.h"
 #include "ota.h"
 #include "ota_ui.h"
+#include "w25q16.h"
+
 
 /*开始任务*/
 #define START_TASK_STACK_SIZE 128
@@ -109,7 +111,7 @@ void LVGL_Task(void *pvParameters)
     ota_ui_init();
   	
     USART1_Printf("System init OK, OTA enabled\r\n");
-
+	
     for (;;)
     {
         ota_feed_watchdog();   // 喂独立看门狗（Bootloader 启动，约8s超时）

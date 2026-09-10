@@ -8,11 +8,16 @@
  *   S3 16KB @0x0800C000 | S4 64KB @0x08010000 | S5 128KB @0x08020000
  *   S6 128KB @0x08040000 | S7 128KB @0x08060000
  *
- * 分区布局（参数区独立扇区，避免跨扇区擦除冲突）:
+ * 片内分区布局（优化版：单 A 槽 + 外部 Flash 暂存/备份/恢复）:
  *   Bootloader  48KB @ 0x08000000  (S0-S2)
  *   参数区      16KB @ 0x0800C000  (S3)
- *   App A(Active) 192KB @ 0x08010000 (S4-S5)
- *   App B(Backup) 256KB @ 0x08040000 (S6-S7)
+ *   App A(Active) 448KB @ 0x08010000 (S4-S7)
+ *
+ * 外部 W25Q16 (2MB) 分区布局:
+ *   暂存区(Staging)  448KB @ 0x00000000  (新固件下载到这里)
+ *   备份区(Backup)   448KB @ 0x00070000  (旧版本备份)
+ *   恢复区(Recovery) 448KB @ 0x000E0000  (出厂固件)
+ *   资源区(Resource) ~704KB @ 0x00150000
  ******************************************************************************
  */
 #ifndef __PARTITION_H
@@ -23,6 +28,8 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+
+/* ========== 片内 Flash 分区 ========== */
 
 /* Flash 总容量 */
 #define OTA_FLASH_SIZE            (512UL * 1024UL)
@@ -40,17 +47,39 @@ extern "C" {
 #define OTA_PARAM_SLOT_A_ADDR     (OTA_PARAM_AREA_ADDR)
 #define OTA_PARAM_SLOT_B_ADDR     (OTA_PARAM_AREA_ADDR + OTA_PARAM_SLOT_SIZE)
 
-/* App 分区 */
-#define OTA_APP_A_ADDR            0x08010000UL   /* Active 分区（S4-S5，192KB） */
-#define OTA_APP_B_ADDR            0x08040000UL   /* Backup 分区（S6-S7，256KB） */
-#define OTA_APP_SIZE              0x00030000UL   /* App A 分区大小 192KB */
+/* App A 分区（S4-S7，448KB） */
+#define OTA_APP_A_ADDR            0x08010000UL
+#define OTA_APP_SIZE              0x00070000UL   /* 448KB */
 
-/* 固件镜像上限：192KB（与 App A 分区 S4-S5 完全一致，当前固件 196608B） */
-#define OTA_APP_IMAGE_MAX_SIZE    0x00030000UL
+/* 固件镜像上限：448KB（与 App A 分区 S4-S7 完全一致） */
+#define OTA_APP_IMAGE_MAX_SIZE    0x00070000UL
 
-/* 启动标志 */
+/* ========== 外部 W25Q16 分区 ========== */
+
+/* 外部 Flash 总容量 2MB */
+#define EXT_FLASH_SIZE            (2UL * 1024UL * 1024UL)
+
+/* 外部 Flash 分区大小（各 448KB） */
+#define EXT_REGION_SIZE           0x00070000UL   /* 448KB */
+
+/* 暂存区：新固件下载到这里 */
+#define EXT_STAGING_ADDR          0x00000000UL
+
+/* 备份区：旧版本备份 */
+#define EXT_BACKUP_ADDR           (EXT_STAGING_ADDR + EXT_REGION_SIZE)   /* 0x00070000 */
+
+/* 恢复区：出厂固件 */
+#define EXT_RECOVERY_ADDR         (EXT_BACKUP_ADDR + EXT_REGION_SIZE)    /* 0x000E0000 */
+
+/* 资源区：剩余空间 */
+#define EXT_RESOURCE_ADDR         (EXT_RECOVERY_ADDR + EXT_REGION_SIZE)  /* 0x00150000 */
+
+/* ========== 启动标志 ========== */
+
 #define OTA_BOOT_FLAG_NORMAL      0UL            /* 正常启动 */
 #define OTA_BOOT_FLAG_TRY_NEW     1UL            /* 尝试启动新固件 */
+#define OTA_BOOT_FLAG_ROLLBACK    2UL            /* 回滚到备份版本 */
+#define OTA_BOOT_FLAG_RECOVERY    3UL            /* 恢复出厂设置（从恢复区拷贝） */
 
 /* Backup 分区状态 */
 #define OTA_BACKUP_EMPTY          0x00U

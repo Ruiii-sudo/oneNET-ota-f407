@@ -3,6 +3,7 @@
 "bootloader\main.o"
 "bootloader\gpio.o"
 "bootloader\iwdg.o"
+"bootloader\spi.o"
 "bootloader\usart.o"
 "bootloader\stm32f4xx_it.o"
 "bootloader\stm32f4xx_hal_msp.o"
@@ -20,6 +21,7 @@
 "bootloader\stm32f4xx_hal_cortex.o"
 "bootloader\stm32f4xx_hal.o"
 "bootloader\stm32f4xx_hal_exti.o"
+"bootloader\stm32f4xx_hal_spi.o"
 "bootloader\stm32f4xx_hal_tim.o"
 "bootloader\stm32f4xx_hal_tim_ex.o"
 "bootloader\stm32f4xx_hal_uart.o"
@@ -30,6 +32,7 @@
 "bootloader\flash_if.o"
 "bootloader\param_area.o"
 "bootloader\sha256.o"
+"bootloader\w25q16.o"
 --strict --scatter "BootLoader\BootLoader.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

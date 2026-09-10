@@ -30,8 +30,10 @@ void param_area_defaults(ota_param_t *param)
     param->boot_count    = 0;
     param->min_version   = OTA_VERSION(1, 0, 0);
     param->resume_offset = 0;
-    param->active_slot   = 0;   /* 默认 App A */
     param->backup_status = OTA_BACKUP_EMPTY;
+    param->backup_version = 0;
+    param->backup_len    = 0;
+    param->recovery_len  = 0;
     param->crc32         = param_area_crc(param);
 }
 

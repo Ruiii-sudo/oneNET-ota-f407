@@ -116,8 +116,8 @@ extern "C" {
  *                      格式一致（如平台升级包版本填 1.0.1，这里就填 "1.0.1"）。
  * 发布新固件时两处同步修改。
  */
-#define OTA_APP_VERSION_NUM   OTA_VERSION(1, 0, 1)
-#define OTA_APP_VERSION_STR   "1.0.1"
+#define OTA_APP_VERSION_NUM   OTA_VERSION(1, 0, 0)
+#define OTA_APP_VERSION_STR   "1.0.0"
 
 /* ---- 下载参数 ---- */
 #define OTA_DOWNLOAD_BLOCK      4096U   /* 下载块 4KB */
