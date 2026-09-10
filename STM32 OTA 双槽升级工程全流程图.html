@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STM32 OTA 双槽升级工程全流程图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #f5f5f3;
+    padding: 20px;
+    color: #1a1b1c;
+    line-height: 1.5;
+  }
+  .container { max-width: 860px; margin: 0 auto; }
+  h1 {
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 6px;
+    color: #1a1b1c;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #5f6670;
+    margin-bottom: 24px;
+  }
+
+  /* 图例 */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 28px;
+    font-size: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* 阶段标题 */
+  .stage {
+    margin-bottom: 20px;
+  }
+  .stage-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .stage-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #4f6b9a;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .stage-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .stage-who {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .who-bl { background: #e3ebf5; color: #4f6b9a; }
+  .who-app { background: #e3f0e8; color: #35705a; }
+  .who-both { background: #f0e8d8; color: #9a6a2f; }
+
+  /* 步骤卡片 */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 14px;
+    border-left: 2px solid #e4e3dd;
+    margin-left: 13px;
+  }
+  .step {
+    background: #fff;
+    border: 1px solid #e4e3dd;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    position: relative;
+  }
+  .step::before {
+    content: '';
+    position: absolute;
+    left: -19px;
+    top: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #4f6b9a;
+  }
+  .step.app-step::before { border-color: #35705a; }
+  .step-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .step-desc {
+    color: #5f6670;
+    font-size: 12px;
+  }
+  .step-write {
+    margin-top: 6px;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    background: #fdf6e8;
+    color: #9a6a2f;
+  }
+  .step-read {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #5f6670;
+  }
+
+  /* 分支 */
+  .branch {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .branch-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9a6a2f;
+    margin-bottom: 4px;
+  }
+  .branch-case {
+    background: #faf9f6;
+    border: 1px dashed #d0cfc8;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  .branch-case-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  /* Flash 分区图 */
+  .flash-map {
+    background: #fff;
+    border: 1px solid #e4e3dd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 28px;
+  }
+  .flash-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .flash-row {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .flash-block {
+    flex: 1;
+    border-radius: 4px;
+    padding: 8px 6px;
+    text-align: center;
+    font-size: 11px;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .flash-block .addr {
+    font-size: 10px;
+    opacity: 0.85;
+  }
+  .flash-block .name {
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .flash-block .size {
+    font-size: 10px;
+    opacity: 0.8;
+  }
+
+  /* 底部说明 */
+  .footer-note {
+    margin-top: 28px;
+    background: #fff;
+    border: 1px solid #e4e3dd;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 12px;
+    color: #5f6670;
+  }
+  .footer-note h3 {
+    font-size: 13px;
+    color: #1a1b1c;
+    margin-bottom: 8px;
+  }
+  .footer-note ul {
+    padding-left: 18px;
+  }
+  .footer-note li {
+    margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>STM32F407 OTA 双槽升级工程全流程图</h1>
+  <p class="subtitle">BootLoader + App 分工 / Flash 分区 / 参数区读写 / 升级切换全流程</p>
+
+  <!-- 图例 -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#4f6b9a;"></div>
+      <span>BootLoader 执行</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#35705a;"></div>
+      <span>App 执行</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#9a6a2f;"></div>
+      <span>读写参数区</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#7a7a7a;"></div>
+      <span>读写 Flash</span>
+    </div>
+  </div>
+
+  <!-- Flash 分区图 -->
+  <div class="flash-map">
+    <div class="flash-title">Flash 分区布局（F407VET6 共 512KB）</div>
+    <div class="flash-row">
+      <div class="flash-block" style="background:#4f6b9a;flex:0.25;">
+        <div class="name">BootLoader</div>
+        <div class="addr">0x08000000</div>
+        <div class="size">48KB (S0-S2)</div>
+      </div>
+      <div class="flash-block" style="background:#9a6a2f;flex:0.08;">
+        <div class="name">参数区</div>
+        <div class="addr">0x0800C000</div>
+        <div class="size">16KB (S3)</div>
+      </div>
+      <div class="flash-block" style="background:#35705a;flex:1;">
+        <div class="name">A 槽（运行槽）</div>
+        <div class="addr">0x08010000</div>
+        <div class="size">192KB (S4-S5) — App 始终从这里运行</div>
+      </div>
+    </div>
+    <div class="flash-row">
+      <div class="flash-block" style="background:#7a9a6a;flex:1.08;">
+        <div class="name">B 槽（暂存槽）</div>
+        <div class="addr">0x08040000</div>
+        <div class="size">256KB (S6-S7) — 新固件下载到这里，校验后拷贝到 A</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 阶段 1：上电启动 -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">1</div>
+      <div class="stage-title">上电启动</div>
+      <div class="stage-who who-bl">BootLoader 执行</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-title">① 读参数区</div>
+        <div class="step-desc">从 S3 扇区读参数（boot_flag、版本号、断点等）</div>
+        <div class="step-read">📖 读：参数区 S3</div>
+      </div>
+      <div class="step">
+        <div class="step-title">② 参数区无效？（第一次烧录 / 全片擦除）</div>
+        <div class="step-desc">magic 不匹配或 CRC 校验失败 → 生成默认值并写入</div>
+        <div class="step-write">✏️ 写：参数区 ← 默认值（version=1.0.0, flag=NORMAL, slot=A）</div>
+      </div>
+      <div class="branch">
+        <div class="branch-label">根据 boot_flag 分支：</div>
+        <div class="branch-case">
+          <div class="branch-case-title">A. boot_flag = NORMAL（正常启动）</div>
+          直接跳 A 槽运行，不做任何操作
+          <div class="step-read">➡️ 跳转到 0x08010000 执行 App</div>
+        </div>
+        <div class="branch-case">
+          <div class="branch-case-title">B. boot_flag = TRY_NEW（升级后首次启动）</div>
+          <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
+            <div>③ 校验 B 槽固件 SHA-256</div>
+            <div>④ 擦除 A 槽扇区（S4-S5）</div>
+            <div>⑤ 逐块把 B 槽固件拷贝到 A 槽</div>
+            <div>⑥ boot_count++，写回参数区</div>
+            <div>⑦ 跳 A 槽运行新固件</div>
+          </div>
+          <div class="step-read" style="margin-top:6px;">📖 读：B 槽 + 参数区 SHA-256<br>
+          ✏️ 写：擦 A 槽 → 写 A 槽 → 更新参数区 boot_count</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 阶段 2：App 初始化 -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">2</div>
+      <div class="stage-title">App 启动初始化</div>
+      <div class="stage-who who-app">App 执行</div>
+    </div>
+    <div class="steps">
+      <div class="step app-step">
+        <div class="step-title">① 初始化硬件</div>
+        <div class="step-desc">时钟、LVGL 显示、USART3（接 ESP-01S）、FreeRTOS 启动</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">② 读参数区，初始化 About 页面</div>
+        <div class="step-desc">屏幕显示：设备ID、固件版本、当前槽位、备份状态、boot_flag、启动计数</div>
+        <div class="step-read">📖 读：参数区 → 填充 About 页面</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">③ 判断是否新固件首启</div>
+        <div class="step-desc">如果 boot_flag = TRY_NEW → 进入 30 秒静默确认窗口（不做任何升级动作，防止新固件崩溃）</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 阶段 3：OTA 检查 -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">3</div>
+      <div class="stage-title">OTA 检查阶段</div>
+      <div class="stage-who who-app">App 执行</div>
+    </div>
+    <div class="steps">
+      <div class="step app-step">
+        <div class="step-title">① 30 秒确认窗口到点</div>
+        <div class="step-desc">新固件跑稳了 → 调用 ota_confirm_boot_success() 固化升级成功</div>
+        <div class="step-write">✏️ 写：参数区 ← flag=NORMAL, version=当前固件版本号</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">② 初始化 ESP-01S</div>
+        <div class="step-desc">AT 握手、设置单连接模式（CIPMUX=0）</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">③ 连接 WiFi</div>
+        <div class="step-desc">连接路由器，等待获取 IP</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">④ HTTP 阶段：检查升级任务</div>
+        <div class="step-desc">
+          · 上报当前版本号到 OneNET<br>
+          · 请求检查有没有新的升级任务<br>
+          · 如果有 → 拿到下载 URL、MD5、文件大小<br>
+          · 如果没有 → 进入 MQTT 等待平台推送
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 阶段 4：下载升级 -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">4</div>
+      <div class="stage-title">下载新固件到 B 槽</div>
+      <div class="stage-who who-app">App 执行</div>
+    </div>
+    <div class="steps">
+      <div class="step app-step">
+        <div class="step-title">① 开始下载</div>
+        <div class="step-desc">通过 ESP8266 发 HTTP GET 请求，从 OneNET 下载固件包</div>
+        <div class="step-write">✏️ 写：参数区 ← backup_status=DOWNLOADING, dl_tid=任务ID</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">② 边下边写 B 槽</div>
+        <div class="step-desc">
+          · 每收到一段数据 → 直接写到 B 槽（0x08040000）<br>
+          · 同时计算 MD5 / SHA-256<br>
+          · 每 16KB 写一次断点位置到参数区（断电可续传）
+        </div>
+        <div class="step-write">✏️ 写：B 槽 Flash + 参数区（断点位置）</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">③ 进度上报</div>
+        <div class="step-desc">每到一定百分比 → 断开连接 → 上报进度到 OneNET → 重新连接续传</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">④ 下载完成，校验</div>
+        <div class="step-desc">
+          · 对比计算的 MD5 和平台给的 MD5<br>
+          · 不一致 → 升级失败，回到正常运行<br>
+          · 一致 → 记录 B 槽固件长度和 SHA-256 到参数区
+        </div>
+        <div class="step-write">✏️ 写：参数区 ← image_len, image_sha, backup_status=VALID</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 阶段 5：触发重启 -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">5</div>
+      <div class="stage-title">触发重启切换</div>
+      <div class="stage-who who-app">App 执行</div>
+    </div>
+    <div class="steps">
+      <div class="step app-step">
+        <div class="step-title">① 置 TRY_NEW 标志，重启</div>
+        <div class="step-desc">告诉 BootLoader：下次启动要拷贝新固件</div>
+        <div class="step-write">✏️ 写：参数区 ← boot_flag=TRY_NEW</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">② 系统复位</div>
+        <div class="step-desc">调用 NVIC_SystemReset() 重启芯片</div>
+        <div class="step-read">➡️ 回到阶段 1：上电启动</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 阶段 6：新固件确认 -->
+  <div class="stage">
+    <div class="stage-header">
+      <div class="stage-num">6</div>
+      <div class="stage-title">新固件启动确认</div>
+      <div class="stage-who who-both">BootLoader → App</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-title">① BootLoader 拷贝 B→A</div>
+        <div class="step-desc">见阶段 1 的 TRY_NEW 分支</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">② 新固件启动，进入 30 秒确认窗口</div>
+        <div class="step-desc">
+          新固件跑 30 秒不崩溃 → 升级成功<br>
+          新固件跑崩了（跑飞、看门狗复位）→ 反复重启直到 boot_count 超限
+        </div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">③ 确认成功，固化</div>
+        <div class="step-desc">boot_flag=NORMAL，版本号更新为新固件版本</div>
+        <div class="step-write">✏️ 写：参数区 ← flag=NORMAL, version=新版本号, boot_count=0</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">④ 上报升级完成到 OneNET</div>
+        <div class="step-desc">平台那边显示升级成功</div>
+      </div>
+      <div class="step app-step">
+        <div class="step-title">⑤ 回到正常运行</div>
+        <div class="step-desc">等待下一次升级任务</div>
+        <div class="step-read">➡️ 回到阶段 3：OTA 检查</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部说明 -->
+  <div class="footer-note">
+    <h3>关键设计要点</h3>
+    <ul>
+      <li><b>双槽设计</b>：A 槽永远是运行槽（链接地址固定 0x08010000），B 槽是暂存槽。新固件下载到 B，校验通过后 BootLoader 才把 B 拷贝到 A，不会直接在 A 上覆盖写。</li>
+      <li><b>参数区</b>：S3 扇区独立，存所有升级状态（boot_flag、版本号、断点位置、SHA-256）。App 和 BootLoader 都靠它交换信息。</li>
+      <li><b>断电安全</b>：下载中途断电 → B 槽有断点记录，下次开机续传。拷贝中途断电 → B 槽完整保留，BootLoader 下次开机重试拷贝。</li>
+      <li><b>防砖机制（有限）</b>：新固件连续启动失败超过 3 次（boot_count 超限），BootLoader 放弃 TRY_NEW，不再反复拷贝 B→A，避免一直卡在重启循环。但 A 槽已经被新固件覆盖，<b>没有旧版本可恢复</b>，真正的恢复要靠串口下载或外部烧录。</li>
+      <li><b>30 秒确认窗口</b>：新固件启动后静默等 30 秒，确认不崩溃才更新版本号和 boot_flag。如果跑崩了，根本走不到这一步。</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
