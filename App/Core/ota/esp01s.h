@@ -31,7 +31,7 @@ extern UART_HandleTypeDef huart3;
 #define ESP_CLOSED   -3
 
 /* 串口接收环形缓冲区大小
-   [FIX-8] 1024 -> 2048：下载数据时 OTA 任务被 LVGL 抢占，若中断喂入
+   [FIX] 1024 -> 2048：下载数据时 OTA 任务被 LVGL 抢占，若中断喂入
    速度超过消费速度会导致丢字节；115200 波特率约 11.5KB/s，
    2048 字节可容忍约 178ms 的消费停顿 */
 #define ESP_RX_RING_SIZE   2048U
@@ -47,7 +47,7 @@ int  esp01s_join_ap(const char *ssid, const char *pass, uint32_t timeout_ms);
 /*
  * 查询 WiFi 连接状态：AT+CWJAP?，应答 +CWJAP:3 视为已连接并获取 IP。
  * 返回 ESP_OK=已连接；ESP_ERR=未连接/ERROR；ESP_TIMEOUT=超时。
- * [FIX-20] 供 OTA 任务在 HTTP 失败时区分"WiFi 掉了"与"纯网络失败"：
+ * [FIX] 供 OTA 任务在 HTTP 失败时区分"WiFi 掉了"与"纯网络失败"：
  *   WiFi 掉了应立即重连（回 CONNECTING），而不是盲目退避 3s~24s。
  */
 int  esp01s_wifi_status(uint32_t timeout_ms);

@@ -226,6 +226,44 @@ static int boot_verify_staging(const ota_param_t *param)
 }
 
 /**
+ * @brief  通用校验外部 Flash 固件 SHA-256
+ * @param  ext_addr: 外部 Flash 起始地址
+ * @param  len: 固件长度
+ * @param  expect_sha: 期望的 SHA-256 摘要
+ * @return 0: 校验成功, -1: 校验失败
+ */
+static int boot_verify_ext_image(uint32_t ext_addr, uint32_t len, const uint8_t *expect_sha)
+{
+    uint8_t digest[SHA256_DIGEST_SIZE];
+    uint32_t remaining;
+    uint8_t chunk[64];
+    sha256_ctx_t ctx;
+
+    if (len == 0 || len > OTA_APP_IMAGE_MAX_SIZE)
+    {
+        return -1;
+    }
+
+    sha256_init(&ctx);
+    remaining = len;
+    while (remaining > 0)
+    {
+        uint32_t take = (remaining > sizeof(chunk)) ? sizeof(chunk) : remaining;
+        w25q16_read(ext_addr + (len - remaining), chunk, take);
+        sha256_update(&ctx, chunk, take);
+        remaining -= take;
+        HAL_IWDG_Refresh(&hiwdg);
+    }
+    sha256_final(&ctx, digest);
+
+    if (sha256_equal(digest, expect_sha) != 1)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+/**
  * @brief  copy staging image (external flash) to run slot (internal A)
  */
 static int boot_copy_staging_to_run(const ota_param_t *param)
@@ -290,6 +328,14 @@ static int boot_rollback_from_backup(const ota_param_t *param)
         return -1;
     }
 
+    /* 校验备份区 SHA-256 */
+    if (boot_verify_ext_image(EXT_BACKUP_ADDR, len, param->backup_sha) != 0)
+    {
+        USART1_Printf("[BL] backup SHA-256 FAILED\r\n");
+        return -1;
+    }
+    USART1_Printf("[BL] backup SHA-256 OK\r\n");
+
     /* erase run-slot sectors */
     {
         uint32_t cur = dst;
@@ -336,6 +382,14 @@ static int boot_recover_from_recovery(const ota_param_t *param)
         USART1_Printf("[BL] recovery image len invalid\r\n");
         return -1;
     }
+
+    /* 校验恢复区 SHA-256 */
+    if (boot_verify_ext_image(EXT_RECOVERY_ADDR, len, param->recovery_sha) != 0)
+    {
+        USART1_Printf("[BL] recovery SHA-256 FAILED\r\n");
+        return -1;
+    }
+    USART1_Printf("[BL] recovery SHA-256 OK\r\n");
 
     /* erase run-slot sectors */
     {

@@ -21,15 +21,15 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-/* [FIX-13] 涓插彛鎵撳嵃绾跨▼瀹夊叏锛?
-   USART1_Printf 浣跨敤鍏变韩闈欐?佺紦鍐? + DMA锛屽浠诲姟锛圤TA_Task / LVGL_Task /
-   HardFault 鎵撳嵃锛夊苟鍙戣皟鐢ㄤ細浜掔浉瑕嗙洊缂撳啿鎴栬绛? DMA 瀹屾垚鏍囧織锛屽鑷?
-   鏃ュ織涓㈠け/涓茶銆傚紩鍏? FreeRTOS 浜掓枼閿佷覆琛屽寲锛汭SR 涓婁笅鏂囷紙HardFault锛?
-   涓嶅彇閿侊紝鐩存帴绛夊緟 DMA 瀹屾垚銆? */
+/* 串口打印线程安全；
+   USART1_Printf 使用共享静态缓冲 + DMA，多任务（OTA_Task / LVGL_Task /
+   HardFault 打印）并发调用会互相覆盖缓冲或误等 DMA 完成标志，导致
+   日志丢失/串行。引入 FreeRTOS 互斥锁串行化；ISR 上下文（HardFault）
+   不取锁，直接等待 DMA 完成。 */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
-
+/* 定义全局静态句柄，初始为 NULL */
 static SemaphoreHandle_t s_uart_mtx = NULL;
 
 /* USER CODE END 0 */
@@ -65,9 +65,9 @@ void MX_USART1_UART_Init(void)
   }
   /* USER CODE BEGIN USART1_Init 2 */
 
-  /* 閹靛濮╁鍝勫煑娴ｈ儻鍏楿SART1 */
+  /* 手动强制使能USART1 */
   USART1->CR1 |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-  /* 缁涘绶?1ms鐠侊赴SART缁嬪啿鐣? */
+  /* 等待 1ms 让 USART 稳定 */
   HAL_Delay(1);
 
   /* USER CODE END USART1_Init 2 */
@@ -253,12 +253,12 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-volatile uint8_t usart_dma_tx_over = 1; /* 涓插彛 DMA 鍙戦?佸畬鎴愭爣蹇? */
+volatile uint8_t usart_dma_tx_over = 1; /* 串口 DMA 发送完成标志 */
 
 /**
- * @brief 璁＄畻瀛楃涓查暱搴︼紙鍏煎杞箟瀛楃锛?
- * @param str 鎸囧悜瑕佽绠楅暱搴︾殑瀛楃涓茬殑鎸囬拡
- * @return 杩斿洖瀛楃涓茬殑闀垮害
+ * @brief 计算字符串长度（兼容转义字符）
+ * @param str 指向要计算长度的字符串的指针
+ * @return 返回字符串的长度
  */
 uint16_t calculateStringLength(const uint8_t *str)
 {
@@ -287,7 +287,7 @@ uint16_t calculateStringLength(const uint8_t *str)
 }
 
 /**
- * @brief USART1 浣跨敤 DMA 鍙戦?佸瓧绗︿覆锛堜繚鐣欐棫鎺ュ彛锛屾湭鍔犻攣锛?
+ * @brief USART1 使用 DMA 发送字符串（保留旧接口，未加锁）
  */
 void USART1_TX_DMA_String(uint8_t *pBuf)
 {
@@ -297,15 +297,15 @@ void USART1_TX_DMA_String(uint8_t *pBuf)
 }
 
 /**
- * @brief USART1_Printf 鍑芥暟锛堢嚎绋嬪畨鍏ㄧ増锛?
+ * @brief USART1_Printf 函数（线程安全版）
  *
- * 浣跨敤 USART1 涓插彛杩涜鎵撳嵃杈撳嚭銆?
- * [FIX-13] FreeRTOS 浜掓枼閿佷覆琛屽寲 + ISR 淇濇姢锛?
- *   - 浠诲姟涓婁笅鏂囷細鍙栭攣鍚庣瓑寰呭墠涓?娆? DMA 瀹屾垚锛堟寔閿佺瓑寰呬笉浼氫笌鍏朵粬
- *     浠诲姟骞跺彂鍐欏叡浜紦鍐?/鏍囧織锛夛紝鏋勯?犳姤鏂囥?佸惎鍔? DMA锛屾渶鍚庨噴鏀鹃攣锛?
- *   - ISR 涓婁笅鏂囷紙濡? HardFault 鎵撳嵃锛夛細xSemaphoreTake 鍦ㄤ腑鏂腑闈炴硶锛?
- *     鐩存帴绛夊緟 DMA 瀹屾垚鍚庡彂閫侊紝涓嶅彇閿併??
- * @return 鎴愬姛鎵撳嵃鐨勫瓧绗︽暟锛涘け璐ヨ繑鍥? -1
+ * 使用 USART1 串口进行打印输出。
+ * FreeRTOS 互斥锁串行化 + ISR 保护：
+ *   - 任务上下文：取锁后等待上一次 DMA 完成（持锁等待不会与其他
+ *     任务并发写共享缓冲/标志），构建报文、启动 DMA，最后释放锁；
+ *   - ISR 上下文（如 HardFault 打印）：xSemaphoreTake 在中断中非法，
+ *     直接等待 DMA 完成后发送，不取锁。
+ * @return 成功打印的字符数；失败返回 -1
  */
 int USART1_Printf(const char *format, ...)
 {
@@ -314,7 +314,7 @@ int USART1_Printf(const char *format, ...)
   int rv;
   int in_isr;
 
-  /* 浜掓枼閿佹儼鎬у垱寤猴紙棣栦釜璋冪敤鑰呭垱寤猴紱涓寸晫鍖洪槻骞跺彂閲嶅鍒涘缓锛? */
+  /* 互斥锁惰性创建（首个调用者创建；临界区防并发重复创建） */
   if (s_uart_mtx == NULL)
   {
     taskENTER_CRITICAL();
@@ -331,9 +331,9 @@ int USART1_Printf(const char *format, ...)
   {
     if (xSemaphoreTake(s_uart_mtx, pdMS_TO_TICKS(200)) != pdTRUE)
     {
-      return -1;   /* 鎷夸笉鍒伴攣锛氫涪寮冩湰娆℃棩蹇楋紝閬垮厤鏃犻檺绛夊緟 */
+      return -1;   /* 拿不到锁：丢弃本次日志，避免无限等待 */
     }
-    /* 鎸侀攣绛夊緟鍓嶄竴娆? DMA 瀹屾垚锛圖MA 瀹屾垚鍥炶皟鏄腑鏂紝涓嶉渶瑕侀攣锛? */
+    /* 持锁等待上一次 DMA 完成（DMA 完成回调是中断，不需要锁） */
     while (!usart_dma_tx_over)
     {
       vTaskDelay(1);
@@ -341,7 +341,7 @@ int USART1_Printf(const char *format, ...)
   }
   else
   {
-    /* ISR 涓婁笅鏂囷細绛夊緟 DMA 瀹屾垚 */
+    /* ISR 上下文：等待 DMA 完成 */
     while (!usart_dma_tx_over);
   }
 
@@ -370,8 +370,8 @@ int USART1_Printf(const char *format, ...)
 }
 
 /**
- * @brief UART 浼犺緭瀹屾垚鍥炶皟鍑芥暟
- * @param huart UART 鍙ユ焺鎸囬拡
+ * @brief UART 传输完成回调函数
+ * @param huart UART 句柄指针
  */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {

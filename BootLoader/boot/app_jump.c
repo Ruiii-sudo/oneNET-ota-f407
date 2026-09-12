@@ -57,7 +57,7 @@ void app_jump_execute(uint32_t app_addr)
     /* 1. 关闭全局中断 */
     __disable_irq();
 
-    /* [FIX-14] 清空所有 NVIC 使能位与挂起位：
+    /* 清空所有 NVIC 使能位与挂起位：
        BootLoader 侧若使能过任何外设中断（如 USART/DMA），跳转瞬间
        若恰有中断挂起，会在 App 的 HAL 初始化完成前触发，
        使用未初始化的句柄导致 HardFault。 */

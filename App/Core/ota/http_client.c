@@ -129,32 +129,32 @@ static int http_client_request_once(const char *host, uint16_t port,
     int r;
     int chunked = 0;
     int keep_body = (on_data != NULL) || (resp->body != NULL);
-    /* [FIX-23] 调用方（ota.c）预置了 resp->body/body_cap 指向本地缓冲；
+    /* 调用方（ota.c）预置了 resp->body/body_cap 指向本地缓冲；
        memset 会把这些指针清成 NULL，导致响应体读出来后无处存放、
        body_len 恒为 0（check/status 的 JSON 解析永远失败）。
        先在 memset 前保存，再恢复。 */
     uint8_t *save_body      = resp->body;
     uint32_t save_body_cap  = resp->body_cap;
-    volatile int *save_abort = resp->abort_flag;   /* [FIX-24] 同 body 一并恢复 */
+    volatile int *save_abort = resp->abort_flag;   /* 同 body 一并恢复 */
 
     memset(resp, 0, sizeof(http_resp_t));
     resp->status_code = -1;
     resp->ota_errno   = -1;
     resp->body        = save_body;
     resp->body_cap    = save_body_cap;
-    resp->abort_flag  = save_abort;   /* [FIX-24] 之前被 memset 清成 NULL，
+    resp->abort_flag  = save_abort;   /* 之前被 memset 清成 NULL，
                                          进度上报截断（每 10% 断连上报）从未生效 */
 
     /* 1. TCP 连接 */
     if (esp01s_tcp_connect(host, port, 5000) != ESP_OK)
     {
-        /* [FIX-17] 建连失败也收尾一次：避免模块残留 TCP 状态
+        /*  建连失败也收尾一次：避免模块残留 TCP 状态
            （AT 引擎忙）导致下次 init/建连卡死 */
         esp01s_tcp_close();
         return ESP_ERR;
     }
 
-    /* 2. 构造请求：[FIX-21] 有 body 时头 + body 合并为一次 CIPSEND，
+    /* 2. 构造请求：有 body 时头 + body 合并为一次 CIPSEND，
        减少发送阶段的 AT 往返与"服务器响应抢在 SEND OK 前到达"的竞态窗口 */
     if (body != NULL && body[0] != '\0')
     {
@@ -200,7 +200,7 @@ static int http_client_request_once(const char *host, uint16_t port,
     }
 
     /* 3. 状态行：HTTP/1.1 200 OK / 206 Partial Content
-       [FIX-23] 容错：AT 固件可能在响应前混入杂讯行
+        容错：AT 固件可能在响应前混入杂讯行
        （CLOSED/ERROR/空行等，v7/v8 监听实证），最多跳过 8 行 */
     r = http_read_line(line, sizeof(line), 3000);
     if (r < 0)
@@ -393,7 +393,7 @@ static int http_client_request_once(const char *host, uint16_t port,
 }
 
 /*
- * [FIX-20] HTTP 请求失败瞬时重试包装：
+ *  HTTP 请求失败瞬时重试包装：
  *   - 下载场景（on_data != NULL）不重试：重试会令回调重复写同一段 Flash
  *     （请求层不感知 offset），虽然数据幂等，但失败一半再重写有边界风险；
  *   - 普通请求（check/version/status）最多重试 3 次：每次失败先 CIPCLOSE

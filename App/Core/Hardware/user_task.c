@@ -98,8 +98,6 @@ void start_task(void *pvParameters)
 void LVGL_Task(void *pvParameters)
 {
     // LVGL初始化，注意按顺序进行
-    /* [FIX-ENC] 串口输出统一用 ASCII 英文：源码为 UTF-8、终端多为 GBK 解码，
-       直接打印中文会乱码（"开始LVGL初始化"显示为"寮€濮婰VGL..."） */
     USART1_Printf("STEP1: LVGL core init\r\n");
     lv_init();
     USART1_Printf("STEP2: LVGL display init\r\n");

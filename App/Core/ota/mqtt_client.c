@@ -85,7 +85,7 @@ int mqtt_connect(uint32_t timeout_ms)
 
     if (esp01s_tcp_connect(s_cfg.host, s_cfg.port, 5000) != ESP_OK)
     {
-        /* [FIX-9] 建连失败后尝试收尾：清掉模块侧可能残留的
+        /* 建连失败后尝试收尾：清掉模块侧可能残留的
            CIPSTART 中间态，避免下一次 AT 握手被阻塞 */
         esp01s_tcp_close();
         esp01s_flush_rx();
@@ -143,7 +143,7 @@ int mqtt_connect(uint32_t timeout_ms)
     if (esp01s_send(pkt, body_len, 2000) != ESP_OK) return MQTT_ERR;
 
     /* ---- 等待 CONNACK ---- */
-    /* [FIX-26] CONNACK 前跳过杂讯：AT 2.3.0-dev 固件实测会在数据帧前混入
+    /* CONNACK 前跳过杂讯：AT 2.3.0-dev 固件实测会在数据帧前混入
        OK/空行/CLOSED 等残留（CONNECT 的 "Recv 154 bytes SEND OK" 与 +IPD
        同批到达时，SEND OK 之后的残留字节会先被 mqtt_read_exact 读到）。
        旧实现读到杂讯 → hdr[0]&0xF0 != 0x20 → 立即判失败（02:08 监听 19ms
@@ -183,7 +183,7 @@ int mqtt_connect(uint32_t timeout_ms)
         esp01s_tcp_close();
         return MQTT_ERR;
     }
-    /* [FIX-10] CONNACK return code 非 0：明确返回"鉴权失败"，
+    /* CONNACK return code 非 0：明确返回"鉴权失败"，
        OTA 层可据此区分"网络连不上"与"clientId/用户名/token 错误" */
     if (connack[1] != 0)
     {
@@ -226,7 +226,7 @@ int mqtt_subscribe(const char *topic, uint8_t qos, uint32_t timeout_ms)
     if (esp01s_send(pkt, body_len, 2000) != ESP_OK) return MQTT_ERR;
 
     /* ---- 等待 SUBACK (0x90) ---- */
-    /* [FIX-26] SUBACK 前同样跳过杂讯（防御性，与 CONNACK 同因）：
+    /* SUBACK 前同样跳过杂讯（防御性，与 CONNACK 同因）：
        固件可能在 +IPD 前混入 OK/空行等，先读到则误判失败。 */
     {
         uint8_t found = 0;

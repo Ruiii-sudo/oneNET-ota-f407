@@ -775,21 +775,6 @@
               <FileType>5</FileType>
               <FilePath>..\Core\Hardware\user_task.h</FilePath>
             </File>
-            <File>
-              <FileName>LCD.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Hardware\LCD.h</FilePath>
-            </File>
-            <File>
-              <FileName>touch.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Hardware\touch.h</FilePath>
-            </File>
-            <File>
-              <FileName>XPT2046.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\Hardware\XPT2046.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

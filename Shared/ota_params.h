@@ -34,6 +34,8 @@ typedef struct {
     uint32_t recovery_len;  /* 恢复区的出厂固件大小（字节，0 表示未初始化） */
     uint8_t  backup_status; /* OTA_BACKUP_EMPTY / DOWNLOADING / VALID */
     uint8_t  image_sha[32]; /* 新固件 SHA-256 摘要（下载校验通过后写入） */
+    uint8_t  backup_sha[32];/* 备份区旧固件 SHA-256 摘要 */
+    uint8_t  recovery_sha[32];/* 恢复区出厂固件 SHA-256 摘要 */
     uint32_t dl_tid;        /* 当前下载任务 ID（OneNET 任务号） */
     uint32_t ota_tid;       /* 待上报 201 的任务 ID */
     uint32_t crc32;         /* 结构体 CRC32（不含本字段） */

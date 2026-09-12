@@ -169,24 +169,30 @@ static void ota_init_recovery_if_empty(void)
         ota_feed_watchdog();
     }
     
-    /* 把当前 A 槽固件拷贝到恢复区 */
+    /* 把当前 A 槽固件拷贝到恢复区，同时算 SHA-256 */
     uint32_t remain = fw_size;
     uint8_t rbuf[1024];
     uint32_t copied = 0;
+    uint8_t recovery_digest[SHA256_DIGEST_SIZE];
+    sha256_ctx_t ctx;
+    sha256_init(&ctx);
     while (remain > 0)
     {
         uint32_t take = (remain > sizeof(rbuf)) ? sizeof(rbuf) : remain;
         flash_if_read(OTA_APP_A_ADDR + copied, rbuf, take);
         w25q16_write(EXT_RECOVERY_ADDR + copied, rbuf, take);
+        sha256_update(&ctx, rbuf, take);
         copied += take;
         remain -= take;
         ota_feed_watchdog();
     }
+    sha256_final(&ctx, recovery_digest);
     
-    /* 把实际固件大小写到参数区的 recovery_len */
+    /* 把实际固件大小和 SHA-256 写到参数区 */
     if (param_area_load(&p) == 0)
     {
         p.recovery_len = fw_size;
+        memcpy(p.recovery_sha, recovery_digest, sizeof(recovery_digest));
         param_area_save(&p);
     }
     
@@ -824,20 +830,25 @@ static int ota_do_download(const ota_task_t *task)
         w25q16_erase_block(EXT_BACKUP_ADDR + off);
     }
 
-    /* 把片内 A 槽的旧固件拷贝到外部备份区 */
+    /* 把片内 A 槽的旧固件拷贝到外部备份区，同时算 SHA-256 */
+    uint8_t backup_digest[SHA256_DIGEST_SIZE];
     {
         uint32_t remain = old_image_len;
         uint8_t buf[1024];
         uint32_t copied = 0;
+        sha256_ctx_t ctx;
+        sha256_init(&ctx);
         while (remain > 0)
         {
             uint32_t take = (remain > sizeof(buf)) ? sizeof(buf) : remain;
             flash_if_read(OTA_APP_A_ADDR + copied, buf, take);
             w25q16_write(EXT_BACKUP_ADDR + copied, buf, take);
+            sha256_update(&ctx, buf, take);
             copied += take;
             remain -= take;
             ota_feed_watchdog();
         }
+        sha256_final(&ctx, backup_digest);
     }
 
     /* ---- 固化升级信息 ---- */
@@ -847,6 +858,7 @@ static int ota_do_download(const ota_task_t *task)
         p.backup_version = old_version;  /* 记录备份的旧版本号 */
         p.backup_len    = old_image_len; /* 记录备份的旧固件大小 */
         memcpy(p.image_sha, sha_digest, sizeof(sha_digest));
+        memcpy(p.backup_sha, backup_digest, sizeof(backup_digest));
         p.backup_status = OTA_BACKUP_VALID;
         p.resume_offset = 0;
         p.dl_tid        = task->tid;
@@ -1117,8 +1129,6 @@ void OTA_Task(void *pvParameters)
     {
         startup_pending = 1;
         last_confirm_tick = boot_start_tick;
-        s_status.state = OTA_STATE_TESTING;  /* 静默测试状态 */
-        snprintf(s_status.msg, sizeof(s_status.msg), "testing new firmware");
     }
 	else
     {

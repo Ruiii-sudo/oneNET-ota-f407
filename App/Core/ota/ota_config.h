@@ -3,7 +3,7 @@
  * @file    ota_config.h
  * @brief   OTA 运行配置 —— OneNET/CMIoT 平台内置远程升级（OTA 2.0 / fuse-ota）
  *
- * 适配说明（由"物模型属性下发"方式迁移到平台自带 OTA 升级）：
+ * 适配说明：
  *  - MQTT：订阅 $sys/{pid}/{dev}/ota/inform 接收平台升级任务通知，并回 inform_reply
  *  - HTTP：调用平台南向 OTA 接口（iot-api.heclouds.com / fuse-ota）：
  *      POST /fuse-ota/{pid}/{dev}/version          上报当前版本
@@ -23,18 +23,6 @@ extern "C" {
 
 #include "partition.h"
 
-/*
- * ===== 分区运行模型（OneNET 单升级包兼容版）=====
- *  OneNET 平台一个目标版本只能对应一份升级包，无法按设备当前槽位分发
- *  不同链接地址的镜像，因此由原"双槽互翻"改为：
- *   - App 镜像固定链接/运行在槽位 A（0x08010000，project.sct），
- *     出厂只烧录这一份镜像；
- *   - 槽位 B（0x08040000）仅作升级暂存区：App 下载新固件到 B，
- *     校验 SHA-256 后置 TRY_NEW 重启；
- *   - BootLoader 启动时校验 B，通过后拷贝 B->A 再运行 A；
- *     断电/拷贝失败时 B 保留完整新镜像，下次启动重试。
- *  App 版本号同时必须与平台上"升级包"的版本号格式一致。
- */
 #define OTA_APP_BASE   OTA_APP_A_ADDR
 
 /* ---- WiFi ---- */
@@ -42,9 +30,9 @@ extern "C" {
 #define OTA_WIFI_PASS       "efb5Kd5d"
 
 /*
- * ===== OneNET / CMIoT（MQTT 接入）=====
+ * ===== OneNET（MQTT 接入）=====
  * 接入参数对应关系（OneNET 官方 MQTT 三要素）：
- *   clientId = 设备名称（不是 产品ID_设备名！官方文档为“设备名称”）
+ *   clientId = 设备名称
  *   username = 产品ID
  *   password = token（设备密钥 + 过期时间 计算出的完整字符串，见下方注释）
  *
@@ -53,9 +41,6 @@ extern "C" {
  *   studio-mqtt.heclouds.com  :1883（官方文档 MQTT 域名，IPv4=218.201.45.7）
  *   studio-mqtts.heclouds.com :8883（TLS，本工程 ESP01S 不启用 TLS，勿用）
  *
- * [FIX-5] 域名 -> IP 兜底：esp01s.c 内置域名/IP 兜底表，CIPSTART 用域名
- * 失败（老 AT 固件 DNS 解析差 / 域名解析只剩 IPv6）时自动用 IPv4 重试，
- * 无需改这里。若确认需要手动固定 IP，直接改成 "218.201.45.7" 亦可。
  */
 #define OTA_MQTT_HOST       "studio-mqtt.heclouds.com"
 #define OTA_MQTT_PORT       1883

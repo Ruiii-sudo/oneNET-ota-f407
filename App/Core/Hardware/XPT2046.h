@@ -11,7 +11,7 @@
  * T_CS   -> PC1
  * T_DIN  -> PC0
  * T_DO   -> PC3  (输入上拉)
- * T_IRQ  -> PC2   (本工程使用轮询，未使用中断)
+ * T_IRQ  -> PC2  (本工程使用轮询，未使用中断)
  */
 #define XPT2046_CLK_PORT    GPIOC
 #define XPT2046_CLK_PIN     GPIO_PIN_4

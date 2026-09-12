@@ -3,7 +3,7 @@
 <title>Static Call Graph - [test\test.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image test\test.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Thu Sep 10 20:39:21 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Sep 13 01:13:58 2026
 <BR><P>
 <H3>Maximum Stack Usage =        324 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1438,9 +1438,9 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = w25q16_erase_chip &rArr; w25q16_wait_busy &rArr; w25q16_read_status1 &rArr; spi_xfer_byte &rArr; HAL_SPI_TransmitReceive &rArr; SPI_EndRxTxTransaction &rArr; SPI_WaitFlagStateUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GPIO_WritePin
-<LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;spi_xfer_byte
 <LI><a href="#[eb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;w25q16_write_enable
 <LI><a href="#[ec]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;w25q16_wait_busy
+<LI><a href="#[ea]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;spi_xfer_byte
 </UL>
 <BR>[Called By]<UL><LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>

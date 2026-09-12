@@ -95,22 +95,22 @@ int main(void)
 
   USART1_Printf("\r\n=== W25Q16 Erase Tool ===\r\n");
 
-  /* 鍒濆鍖? W25Q16 */
+  /* 初始化 W25Q16 */
   w25q16_init();
 
-  /* 璇? JEDEC ID锛岀‘璁よ姱鐗囪繛鎺ユ甯? */
+  /* 读取 JEDEC ID, 确认芯片连接正常 */
   uint32_t id = w25q16_read_jedec_id();
   USART1_Printf("JEDEC ID: 0x%06lX\r\n", (unsigned long)id);
 
-  /* 鎿﹂櫎鏁翠釜 W25Q16 鑺墖 */
+  /* 擦除整个 W26Q16 芯片 */
   USART1_Printf("Erasing chip...\r\n");
   w25q16_erase_chip();
 
-  /* 绛夊緟鎿﹂櫎瀹屾垚 */
+  /* 等待擦除完成 */
   USART1_Printf("Erase done!\r\n");
   USART1_Printf("You can now flash your OTA firmware.\r\n");
 
-  /* 鏍囪鎿﹂櫎瀹屾垚 */
+  /* 标记擦除完成 */
   erase_done = 1;
 
   /* USER CODE END 2 */
@@ -126,12 +126,12 @@ int main(void)
 
     if (erase_done)
     {
-      /* 鎿﹂櫎瀹屾垚锛屾參闂紙1绉掞級 */
+      /* 擦除完成，慢闪烁（1秒） */
       HAL_Delay(1000);
     }
     else
     {
-      /* 姝ｅ湪鎿﹂櫎锛屽揩闂紙100ms锛? */
+      /* 正在擦除，快闪烁（100ms） */
       HAL_Delay(100);
     }
     /* USER CODE BEGIN 3 */
