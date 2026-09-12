@@ -1117,6 +1117,8 @@ void OTA_Task(void *pvParameters)
     {
         startup_pending = 1;
         last_confirm_tick = boot_start_tick;
+        s_status.state = OTA_STATE_TESTING;  /* 静默测试状态 */
+        snprintf(s_status.msg, sizeof(s_status.msg), "testing new firmware");
     }
 	else
     {

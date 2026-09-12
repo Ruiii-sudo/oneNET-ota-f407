@@ -21,6 +21,7 @@ typedef enum {
     OTA_STATE_CHECKING,        /* 检测升级任务（HTTP check） */
     OTA_STATE_DOWNLOADING,     /* 下载固件 */
     OTA_STATE_VERIFYING,       /* MD5/SHA-256 校验 */
+    OTA_STATE_TESTING,         /* 新固件静默测试中 */
     OTA_STATE_CONFIRM_REBOOT,  /* 升级完成，等待重启 */
     OTA_STATE_ERROR            /* 出错 */
 } ota_state_t;

@@ -49,6 +49,7 @@
   #define TXT_CHECKING   "检测中"
   #define TXT_DOWNLOAD   "下载中"
   #define TXT_VERIFY     "校验中"
+  #define TXT_TEST       "测试中"
   #define TXT_REBOOT     "即将重启"
   #define TXT_ERROR      "错误"
   #define TXT_FW         "固件"
@@ -69,6 +70,7 @@
   #define TXT_CHECKING   "CHECKING"
   #define TXT_DOWNLOAD   "DOWNLOADING"
   #define TXT_VERIFY     "VERIFYING"
+  #define TXT_TEST       "TESTING"
   #define TXT_REBOOT     "REBOOTING"
   #define TXT_ERROR      "ERROR"
   #define TXT_FW         "Firmware"
@@ -98,19 +100,20 @@
 #define C_ACCENT_DK 0x0EA5E9   /* 按钮主色 */
 #define C_OK        0x4ADE80   /* 成功绿 */
 #define C_WARN      0xFACC15   /* 警告黄 */
+#define C_TEST      0xF59E0B   /* 测试中橙 */
 #define C_ERR       0xF87171   /* 错误红 */
 #define C_TXT       0xF1F5F9   /* 主文字 */
 #define C_TXT_DIM   0x94A3B8   /* 次文字 */
 #define C_TRACK     0x334155   /* 进度条轨道/按钮底色 */
 
-/* 各状态对应强调色：IDLE/CONNECT/WAIT/CHECK/DL/VERIFY/REBOOT/ERR */
+/* 各状态对应强调色：IDLE/CONNECT/WAIT/CHECK/DL/VERIFY/TEST/REBOOT/ERR */
 static const uint32_t s_state_color[] = {
-    C_TXT_DIM, C_WARN, C_ACCENT, C_WARN, C_ACCENT, 0xC084FC, C_OK, C_ERR
+    C_TXT_DIM, C_WARN, C_ACCENT, C_WARN, C_ACCENT, 0xC084FC, C_TEST, C_OK, C_ERR
 };
 
 /* 各状态标题（与 ota_state_t 顺序一致） */
 static const char *const s_state_txt[] = {
-    TXT_IDLE, TXT_CONNECT, TXT_WAIT, TXT_CHECKING, TXT_DOWNLOAD, TXT_VERIFY, TXT_REBOOT, TXT_ERROR
+    TXT_IDLE, TXT_CONNECT, TXT_WAIT, TXT_CHECKING, TXT_DOWNLOAD, TXT_VERIFY, TXT_TEST, TXT_REBOOT, TXT_ERROR
 };
 
 /* ================= 对象句柄 ================= */
@@ -424,6 +427,9 @@ void ota_ui_init(void)
     char buf[48];
 
     lv_obj_set_style_bg_color(scr, lv_color_hex(C_BG), 0);
+    
+    /* 关掉屏幕滚动，防止误触滑动 */
+    lv_obj_clear_flag(scr, LV_OBJ_FLAG_SCROLLABLE);
 
     ota_ui_build_main(scr);
     ota_ui_build_about(scr);

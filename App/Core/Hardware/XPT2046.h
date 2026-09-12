@@ -7,20 +7,20 @@
 #include <stdint.h>
 
 /* XPT2046 引脚定义（MSP2807接线）
- * T_CLK  -> PC10
- * T_CS   -> PC13
- * T_DIN  -> PC12
- * T_DO   -> PC11  (输入上拉)
- * T_IRQ  -> PC8   (本工程使用轮询，未使用中断)
+ * T_CLK  -> PC4
+ * T_CS   -> PC1
+ * T_DIN  -> PC0
+ * T_DO   -> PC3  (输入上拉)
+ * T_IRQ  -> PC2   (本工程使用轮询，未使用中断)
  */
 #define XPT2046_CLK_PORT    GPIOC
-#define XPT2046_CLK_PIN     GPIO_PIN_10
+#define XPT2046_CLK_PIN     GPIO_PIN_4
 #define XPT2046_CS_PORT     GPIOC
-#define XPT2046_CS_PIN      GPIO_PIN_13
+#define XPT2046_CS_PIN      GPIO_PIN_1
 #define XPT2046_DIN_PORT    GPIOC
-#define XPT2046_DIN_PIN     GPIO_PIN_12
+#define XPT2046_DIN_PIN     GPIO_PIN_0
 #define XPT2046_DO_PORT     GPIOC
-#define XPT2046_DO_PIN      GPIO_PIN_11
+#define XPT2046_DO_PIN      GPIO_PIN_3
 
 /* 引脚操作宏 */
 #define XPT2046_CLK_HIGH()  HAL_GPIO_WritePin(XPT2046_CLK_PORT, XPT2046_CLK_PIN, GPIO_PIN_SET)
@@ -33,7 +33,7 @@
 
 /* T_IRQ 引脚（PC8）：未按下时高电平，按下时拉低 */
 #define XPT2046_IRQ_PORT    GPIOC
-#define XPT2046_IRQ_PIN     GPIO_PIN_8
+#define XPT2046_IRQ_PIN     GPIO_PIN_2
 #define XPT2046_IRQ_READ()  HAL_GPIO_ReadPin(XPT2046_IRQ_PORT, XPT2046_IRQ_PIN)
 #define XPT2046_IS_PRESSED()  (XPT2046_IRQ_READ() == GPIO_PIN_RESET)  /* 低电平=按下 */
 
