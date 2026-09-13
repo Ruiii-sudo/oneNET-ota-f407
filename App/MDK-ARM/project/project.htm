@@ -3,7 +3,7 @@
 <title>Static Call Graph - [project\project.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image project\project.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Sep 13 01:02:32 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Sep 13 10:23:30 2026
 <BR><P>
 <H3>Maximum Stack Usage =       6120 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1075,6 +1075,7 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = __aeabi_memcpy4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
+<LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
 <LI><a href="#[44b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_get_status
 <LI><a href="#[451]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_ui_build_about
 <LI><a href="#[287]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_label
@@ -2249,8 +2250,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[bd]"></a>LVGL_Task</STRONG> (Thumb, 60 bytes, Stack size 0 bytes, user_task.o(i.LVGL_Task))
-<BR><BR>[Stack]<UL><LI>Max Depth = 776 + Unknown Stack Size
-<LI>Call Chain = LVGL_Task &rArr; ota_ui_refresh &rArr; lv_label_set_text &rArr; lv_label_refr_text &rArr; lv_obj_invalidate &rArr; lv_obj_invalidate_area &rArr; lv_obj_area_is_visible &rArr; lv_obj_get_transformed_area &rArr; lv_obj_transform_point &rArr;  lv_obj_transform_point (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 848 + Unknown Stack Size
+<LI>Call Chain = LVGL_Task &rArr; ota_ui_refresh &rArr; param_area_load &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_ui_refresh
 <LI><a href="#[1a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_ui_init
@@ -3306,7 +3307,8 @@ Global Symbols
 <P><STRONG><a name="[2db]"></a>flash_if_read</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, flash_if.o(i.flash_if_read))
 <BR><BR>[Calls]<UL><LI><a href="#[271]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_init_recovery_if_empty
+<BR>[Called By]<UL><LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
+<LI><a href="#[1b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_init_recovery_if_empty
 <LI><a href="#[445]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_do_download
 <LI><a href="#[457]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
 </UL>
@@ -7291,7 +7293,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[1b4]"></a>ota_confirm_boot_success</STRONG> (Thumb, 78 bytes, Stack size 160 bytes, ota.o(i.ota_confirm_boot_success))
-<BR><BR>[Stack]<UL><LI>Max Depth = 416<LI>Call Chain = ota_confirm_boot_success &rArr; param_area_save &rArr; flash_if_erase_addr &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
+<BR><BR>[Stack]<UL><LI>Max Depth = 712<LI>Call Chain = ota_confirm_boot_success &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
 <LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
@@ -7316,7 +7318,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[44e]"></a>ota_manual_recovery</STRONG> (Thumb, 26 bytes, Stack size 152 bytes, ota.o(i.ota_manual_recovery))
-<BR><BR>[Stack]<UL><LI>Max Depth = 408<LI>Call Chain = ota_manual_recovery &rArr; param_area_save &rArr; flash_if_erase_addr &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
+<BR><BR>[Stack]<UL><LI>Max Depth = 704<LI>Call Chain = ota_manual_recovery &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
 <LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
@@ -7326,7 +7328,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[44f]"></a>ota_manual_rollback</STRONG> (Thumb, 42 bytes, Stack size 160 bytes, ota.o(i.ota_manual_rollback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 416<LI>Call Chain = ota_manual_rollback &rArr; param_area_save &rArr; flash_if_erase_addr &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
+<BR><BR>[Stack]<UL><LI>Max Depth = 712<LI>Call Chain = ota_manual_rollback &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
 <LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
@@ -7341,7 +7343,7 @@ Global Symbols
 
 <P><STRONG><a name="[1a3]"></a>ota_ui_init</STRONG> (Thumb, 188 bytes, Stack size 208 bytes, ota_ui.o(i.ota_ui_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 744 + Unknown Stack Size
-<LI>Call Chain = ota_ui_init &rArr; ota_ui_build_about &rArr; lv_obj_create &rArr; lv_obj_class_init_obj &rArr; lv_theme_apply &rArr; lv_obj_remove_style &rArr; lv_obj_refresh_style &rArr; refresh_children_style &rArr;  refresh_children_style (Cycle)
+<LI>Call Chain = ota_ui_init &rArr; param_area_load &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
 <LI><a href="#[3f3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_obj_set_style_bg_color
@@ -7359,8 +7361,8 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[1a6]"></a>ota_ui_refresh</STRONG> (Thumb, 430 bytes, Stack size 312 bytes, ota_ui.o(i.ota_ui_refresh))
-<BR><BR>[Stack]<UL><LI>Max Depth = 776 + Unknown Stack Size
-<LI>Call Chain = ota_ui_refresh &rArr; lv_label_set_text &rArr; lv_label_refr_text &rArr; lv_obj_invalidate &rArr; lv_obj_invalidate_area &rArr; lv_obj_area_is_visible &rArr; lv_obj_get_transformed_area &rArr; lv_obj_transform_point &rArr;  lv_obj_transform_point (Cycle)
+<BR><BR>[Stack]<UL><LI>Max Depth = 848 + Unknown Stack Size
+<LI>Call Chain = ota_ui_refresh &rArr; param_area_load &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
 <LI><a href="#[44b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_get_status
@@ -7398,10 +7400,11 @@ Global Symbols
 <LI><a href="#[442]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_apply_and_reboot
 </UL>
 
-<P><STRONG><a name="[1b3]"></a>param_area_load</STRONG> (Thumb, 34 bytes, Stack size 8 bytes, param_area.o(i.param_area_load))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = param_area_load &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
+<P><STRONG><a name="[1b3]"></a>param_area_load</STRONG> (Thumb, 86 bytes, Stack size 336 bytes, param_area.o(i.param_area_load))
+<BR><BR>[Stack]<UL><LI>Max Depth = 536<LI>Call Chain = param_area_load &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[457]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
+<LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[44f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_manual_rollback
 <LI><a href="#[44e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_manual_recovery
@@ -7416,10 +7419,12 @@ Global Symbols
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;OTA_Task
 </UL>
 
-<P><STRONG><a name="[273]"></a>param_area_save</STRONG> (Thumb, 68 bytes, Stack size 168 bytes, param_area.o(i.param_area_save))
-<BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = param_area_save &rArr; flash_if_erase_addr &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
+<P><STRONG><a name="[273]"></a>param_area_save</STRONG> (Thumb, 162 bytes, Stack size 352 bytes, param_area.o(i.param_area_save))
+<BR><BR>[Stack]<UL><LI>Max Depth = 552<LI>Call Chain = param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
-<BR>[Calls]<UL><LI><a href="#[2dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_write
+<BR>[Calls]<UL><LI><a href="#[2db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_read
+<LI><a href="#[457]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
+<LI><a href="#[2dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_write
 <LI><a href="#[2d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_erase_addr
 <LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 <LI><a href="#[455]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
@@ -8234,8 +8239,8 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[b6]"></a>dl_on_data</STRONG> (Thumb, 314 bytes, Stack size 192 bytes, ota.o(i.dl_on_data))
-<BR><BR>[Stack]<UL><LI>Max Depth = 560 + Unknown Stack Size
-<LI>Call Chain = dl_on_data &rArr; sha256_update &rArr; sha256_transform
+<BR><BR>[Stack]<UL><LI>Max Depth = 744 + Unknown Stack Size
+<LI>Call Chain = dl_on_data &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[272]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;w25q16_write
 <LI><a href="#[26f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sha256_update
@@ -8324,8 +8329,8 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[442]"></a>ota_apply_and_reboot</STRONG> (Thumb, 112 bytes, Stack size 152 bytes, ota.o(i.ota_apply_and_reboot))
-<BR><BR>[Stack]<UL><LI>Max Depth = 448 + Unknown Stack Size
-<LI>Call Chain = ota_apply_and_reboot &rArr; mqtt_disconnect &rArr; esp01s_send &rArr; __2snprintf &rArr; _printf_char_common &rArr; __printf
+<BR><BR>[Stack]<UL><LI>Max Depth = 704 + Unknown Stack Size
+<LI>Call Chain = ota_apply_and_reboot &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_IWDG_Refresh
 <LI><a href="#[14e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_Delay
@@ -8398,8 +8403,8 @@ Local Symbols
 </UL>
 
 <P><STRONG><a name="[1b2]"></a>ota_init_recovery_if_empty</STRONG> (Thumb, 308 bytes, Stack size 1368 bytes, ota.o(i.ota_init_recovery_if_empty))
-<BR><BR>[Stack]<UL><LI>Max Depth = 1776 + Unknown Stack Size
-<LI>Call Chain = ota_init_recovery_if_empty &rArr; sha256_final &rArr; sha256_update &rArr; sha256_transform
+<BR><BR>[Stack]<UL><LI>Max Depth = 1920 + Unknown Stack Size
+<LI>Call Chain = ota_init_recovery_if_empty &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[1b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_IWDG_Refresh
 <LI><a href="#[272]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;w25q16_write
@@ -8635,14 +8640,14 @@ Local Symbols
 <BR>[Address Reference Count : 1]<UL><LI> ota_ui.o(i.ota_ui_build_main)
 </UL>
 <P><STRONG><a name="[b9]"></a>ota_ui_btn_recovery_cb</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, ota_ui.o(i.ota_ui_btn_recovery_cb))
-<BR><BR>[Stack]<UL><LI>Max Depth = 408<LI>Call Chain = ota_ui_btn_recovery_cb &rArr; ota_manual_recovery &rArr; param_area_save &rArr; flash_if_erase_addr &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
+<BR><BR>[Stack]<UL><LI>Max Depth = 704<LI>Call Chain = ota_ui_btn_recovery_cb &rArr; ota_manual_recovery &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[44e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_manual_recovery
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> ota_ui.o(i.ota_ui_build_about)
 </UL>
 <P><STRONG><a name="[b8]"></a>ota_ui_btn_rollback_cb</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, ota_ui.o(i.ota_ui_btn_rollback_cb))
-<BR><BR>[Stack]<UL><LI>Max Depth = 416<LI>Call Chain = ota_ui_btn_rollback_cb &rArr; ota_manual_rollback &rArr; param_area_save &rArr; flash_if_erase_addr &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
+<BR><BR>[Stack]<UL><LI>Max Depth = 712<LI>Call Chain = ota_ui_btn_rollback_cb &rArr; ota_manual_rollback &rArr; param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[44f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_manual_rollback
 </UL>
@@ -11625,14 +11630,15 @@ Local Symbols
 <P><STRONG><a name="[bc]"></a>prvTaskExitError</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, port.o(i.prvTaskExitError))
 <BR>[Address Reference Count : 1]<UL><LI> port.o(i.pxPortInitialiseStack)
 </UL>
-<P><STRONG><a name="[457]"></a>slot_load</STRONG> (Thumb, 58 bytes, Stack size 168 bytes, param_area.o(i.slot_load))
-<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = slot_load &rArr; param_area_crc &rArr; crc32_calc
+<P><STRONG><a name="[457]"></a>slot_load</STRONG> (Thumb, 70 bytes, Stack size 184 bytes, param_area.o(i.slot_load))
+<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_read
 <LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 <LI><a href="#[455]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
 </UL>
-<BR>[Called By]<UL><LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
+<BR>[Called By]<UL><LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
+<LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
 </UL>
 
 <P><STRONG><a name="[47f]"></a>sha256_transform</STRONG> (Thumb, 316 bytes, Stack size 336 bytes, sha256.o(i.sha256_transform))

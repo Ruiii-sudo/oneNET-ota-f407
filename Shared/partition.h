@@ -42,10 +42,13 @@ extern "C" {
 #define OTA_PARAM_AREA_ADDR       0x0800C000UL
 #define OTA_PARAM_AREA_SIZE       0x00004000UL   /* 16KB */
 
-/* 参数区槽位（两个 4KB 槽位冗余） */
-#define OTA_PARAM_SLOT_SIZE       0x00001000UL
-#define OTA_PARAM_SLOT_A_ADDR     (OTA_PARAM_AREA_ADDR)
-#define OTA_PARAM_SLOT_B_ADDR     (OTA_PARAM_AREA_ADDR + OTA_PARAM_SLOT_SIZE)
+/* 参数区槽位（轮转写入 / 环形日志，掉电安全）：
+   S3 扇区 16KB 划分为 32 个 512B 槽位，每次保存写下一个空槽，
+   写满 32 次后才整扇区擦除一次。
+   （旧实现为双 4KB 槽位，每次保存都擦整扇区，断电窗口过大） */
+#define OTA_PARAM_SLOT_COUNT      32U
+#define OTA_PARAM_SLOT_SIZE       512U
+#define OTA_PARAM_SLOT0_ADDR      OTA_PARAM_AREA_ADDR   /* 0x0800C000 */
 
 /* App A 分区（S4-S7，448KB） */
 #define OTA_APP_A_ADDR            0x08010000UL

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [BootLoader\BootLoader.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image BootLoader\BootLoader.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Sep 13 01:22:02 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Sep 13 10:25:57 2026
 <BR><P>
 <H3>Maximum Stack Usage =       1880 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -728,6 +728,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_memcpy
 <LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
 <LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
+<LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
 </UL>
 
 <P><STRONG><a name="[13f]"></a>__aeabi_memcpy8</STRONG> (Thumb, 0 bytes, Stack size 8 bytes, rt_memcpy_w.o(.text), UNUSED)
@@ -1580,6 +1581,7 @@ Global Symbols
 <BR><BR>[Calls]<UL><LI><a href="#[10f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy
 </UL>
 <BR>[Called By]<UL><LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
+<LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
 </UL>
 
 <P><STRONG><a name="[10b]"></a>flash_if_sector_number</STRONG> (Thumb, 36 bytes, Stack size 12 bytes, flash_if.o(i.flash_if_sector_number))
@@ -1647,19 +1649,22 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;boot_run
 </UL>
 
-<P><STRONG><a name="[101]"></a>param_area_load</STRONG> (Thumb, 34 bytes, Stack size 8 bytes, param_area.o(i.param_area_load))
-<BR><BR>[Stack]<UL><LI>Max Depth = 192<LI>Call Chain = param_area_load &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
+<P><STRONG><a name="[101]"></a>param_area_load</STRONG> (Thumb, 86 bytes, Stack size 336 bytes, param_area.o(i.param_area_load))
+<BR><BR>[Stack]<UL><LI>Max Depth = 536<LI>Call Chain = param_area_load &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
-<BR>[Calls]<UL><LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
+<BR>[Calls]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
 </UL>
 <BR>[Called By]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;boot_run
 </UL>
 
-<P><STRONG><a name="[103]"></a>param_area_save</STRONG> (Thumb, 68 bytes, Stack size 168 bytes, param_area.o(i.param_area_save))
-<BR><BR>[Stack]<UL><LI>Max Depth = 256<LI>Call Chain = param_area_save &rArr; flash_if_erase_addr &rArr; HAL_FLASHEx_Erase &rArr; FLASH_WaitForLastOperation
+<P><STRONG><a name="[103]"></a>param_area_save</STRONG> (Thumb, 162 bytes, Stack size 352 bytes, param_area.o(i.param_area_save))
+<BR><BR>[Stack]<UL><LI>Max Depth = 552<LI>Call Chain = param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
+<LI><a href="#[112]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
+<LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_read
 <LI><a href="#[fa]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_write
 <LI><a href="#[f6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_erase_addr
 </UL>
@@ -1919,14 +1924,15 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[fe]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;boot_run
 </UL>
 
-<P><STRONG><a name="[112]"></a>slot_load</STRONG> (Thumb, 58 bytes, Stack size 168 bytes, param_area.o(i.slot_load))
-<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = slot_load &rArr; param_area_crc &rArr; crc32_calc
+<P><STRONG><a name="[112]"></a>slot_load</STRONG> (Thumb, 70 bytes, Stack size 184 bytes, param_area.o(i.slot_load))
+<BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 <LI><a href="#[110]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
 <LI><a href="#[10e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_read
 </UL>
-<BR>[Called By]<UL><LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
+<BR>[Called By]<UL><LI><a href="#[103]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
+<LI><a href="#[101]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load
 </UL>
 
 <P><STRONG><a name="[114]"></a>sha256_transform</STRONG> (Thumb, 316 bytes, Stack size 336 bytes, sha256.o(i.sha256_transform))
