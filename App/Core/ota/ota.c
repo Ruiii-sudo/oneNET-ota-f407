@@ -608,6 +608,7 @@ static int ota_do_download(const ota_task_t *task)
         for (uint32_t off = 0; off < OTA_APP_IMAGE_MAX_SIZE; off += 65536)
         {
             w25q16_erase_block(EXT_STAGING_ADDR + off);
+            ota_feed_watchdog();   /* [FIX] 擦除 7 块可能 >8s（IWDG 超时），必须喂狗 */
         }
         c.offset = 0;
         c.last_save = 0;
@@ -828,6 +829,7 @@ static int ota_do_download(const ota_task_t *task)
     for (uint32_t off = 0; off < OTA_APP_IMAGE_MAX_SIZE; off += 65536)
     {
         w25q16_erase_block(EXT_BACKUP_ADDR + off);
+        ota_feed_watchdog();   /* [FIX] 备份区擦除无喂狗，IWDG 8.19s 超时会复位 */
     }
 
     /* 把片内 A 槽的旧固件拷贝到外部备份区，同时算 SHA-256 */
@@ -998,15 +1000,15 @@ static void ota_http_phase(void)
     (void)ota_api_report_version();
 
     /* 3. 检测升级任务
-       [FIX-12] 区分"网络/接口失败"与"确实无任务"：
+       区分"网络/接口失败"与"确实无任务"：
        HTTP 请求失败（返回 -1）进入 ERROR 退避重试，避免误报
        "no task" 后立刻去连 MQTT（此时网络本来就是断的，
        造成 mqtt fail 与 esp init fail 连环失败的假象）。
-       [FIX-20] 失败后再区分"WiFi 掉了"与"纯网络失败"：
+       [FIX] 失败后再区分"WiFi 掉了"与"纯网络失败"：
        WiFi 掉线时立即回 CONNECTING 重连（跳过 3s~24s 退避空转）。 */
     if (ota_api_check_task(&t) != 0)
     {
-        /* [FIX-21] 只有应答明确"未连接"（+CWJAP:0/1/2/4 或 ERROR）才重连；
+        /* 只有应答明确"未连接"（+CWJAP:0/1/2/4 或 ERROR）才重连；
            ESP_TIMEOUT（AT 引擎忙、查询无人应答）不代表 WiFi 掉了，
            按原逻辑退避重试，避免"查询超时→全量重连"的 ~7s 死循环。 */
         if (esp01s_wifi_status(2000) == ESP_ERR)
@@ -1078,7 +1080,7 @@ static void ota_http_phase(void)
 
 /* ================= 失败退避 ================= */
 
-/* [FIX-11] 连续失败退避：3s -> 6s -> 12s -> 24s（上限 24s），
+/* 连续失败退避：3s -> 6s -> 12s -> 24s（上限 24s），
    任一环节成功即清零。防止模块/网络异常时以 3s 周期无限空转刷串口，
    也给 ESP 模块（如供电不足自恢复）留出恢复时间。 */
 static uint32_t s_fail_cnt = 0;
@@ -1129,6 +1131,8 @@ void OTA_Task(void *pvParameters)
     {
         startup_pending = 1;
         last_confirm_tick = boot_start_tick;
+		s_status.state = OTA_STATE_TESTING;                                   
+		snprintf(s_status.msg, sizeof(s_status.msg), "testing new firmware");
     }
 	else
     {
@@ -1201,7 +1205,7 @@ void OTA_Task(void *pvParameters)
             }
             if (!ok)
             {
-                /* [FIX-11] 失败退避；esp01s_init 内部已含 AT+RST 自恢复 */
+                /* 失败退避；esp01s_init 内部已含 AT+RST 自恢复 */
                 snprintf(s_status.msg, sizeof(s_status.msg), "esp init fail, retry");
                 s_status.state = OTA_STATE_ERROR;
                 ota_fail_wait();
@@ -1230,7 +1234,7 @@ void OTA_Task(void *pvParameters)
                 continue;
             }
             ota_success_reset();
-            /* [FIX-18] WiFi 刚 GOT IP 后，模块网络栈与路由器 NAT 表
+            /*  WiFi 刚 GOT IP 后，模块网络栈与路由器 NAT 表
                需短暂稳定；立即建 TCP 实测得到半死连接（CONNECT OK 但
                SEND OK 后服务器零响应即 CLOSED）。等待 2s 稳定窗口。 */
             HAL_Delay(2000);
@@ -1265,7 +1269,7 @@ void OTA_Task(void *pvParameters)
             cfg.keepalive = OTA_MQTT_KEEPALIVE;
             mqtt_init(&cfg);
 
-            /* [FIX-10] 区分鉴权失败与网络失败：
+            /* 区分鉴权失败与网络失败：
                MQTT_AUTH_ERR = CONNACK 拒绝（clientId/用户名/token 错，
                OneNET token 过期等），属配置问题，重试无意义也按退避走，
                但串口信息直接给出判断方向 */
@@ -1281,7 +1285,7 @@ void OTA_Task(void *pvParameters)
                     snprintf(s_status.msg, sizeof(s_status.msg), "mqtt conn fail");
                 }
                 s_status.state = OTA_STATE_ERROR;
-                mqtt_disconnect();   /* [FIX-9] 收尾清理，避免模块残留中间态 */
+                mqtt_disconnect();   /* 收尾清理，避免模块残留中间态 */
                 ota_fail_wait();
                 continue;
             }

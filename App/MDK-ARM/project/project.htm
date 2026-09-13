@@ -3,9 +3,9 @@
 <title>Static Call Graph - [project\project.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image project\project.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Sep 13 10:23:30 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sun Sep 13 17:11:01 2026
 <BR><P>
-<H3>Maximum Stack Usage =       6120 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =       6104 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 OTA_Task &rArr; ota_http_phase &rArr; ota_do_download &rArr; ota_api_report_status &rArr; http_client_request &rArr; http_client_request_once &rArr; esp01s_tcp_connect &rArr; esp01s_at_cmd &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 <P>
@@ -2363,8 +2363,8 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[bf]"></a>OTA_Task</STRONG> (Thumb, 688 bytes, Stack size 584 bytes, ota.o(i.OTA_Task))
-<BR><BR>[Stack]<UL><LI>Max Depth = 6120 + Unknown Stack Size
+<P><STRONG><a name="[bf]"></a>OTA_Task</STRONG> (Thumb, 698 bytes, Stack size 568 bytes, ota.o(i.OTA_Task))
+<BR><BR>[Stack]<UL><LI>Max Depth = 6104 + Unknown Stack Size
 <LI>Call Chain = OTA_Task &rArr; ota_http_phase &rArr; ota_do_download &rArr; ota_api_report_status &rArr; http_client_request &rArr; http_client_request_once &rArr; esp01s_tcp_connect &rArr; esp01s_at_cmd &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[146]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
@@ -3864,11 +3864,11 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_obj_draw
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_arc
+<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 <LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[274]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bg
 <LI><a href="#[2a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_line_skew
 <LI><a href="#[28b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border_generic
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 <LI><a href="#[294]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_indic
 </UL>
 
@@ -3916,10 +3916,10 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_obj_draw
 <LI><a href="#[97]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_arc
+<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 <LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[274]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bg
 <LI><a href="#[28b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border_generic
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 <LI><a href="#[294]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_indic
 </UL>
 
@@ -4859,6 +4859,8 @@ Global Symbols
 <LI><a href="#[28f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_buf_rotate
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_polygon
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_img_decoded
+<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
+<LI><a href="#[480]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_blur_corner
 <LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[274]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bg
 <LI><a href="#[2a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_line_ver
@@ -4867,8 +4869,6 @@ Global Symbols
 <LI><a href="#[2a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_letter_normal
 <LI><a href="#[265]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;decode_and_draw
 <LI><a href="#[28b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border_generic
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
-<LI><a href="#[480]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_blur_corner
 <LI><a href="#[379]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_img_decoder_built_in_line_indexed
 <LI><a href="#[376]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_img_decoder_built_in_line_alpha
 <LI><a href="#[25b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;circ_calc_aa4
@@ -4880,6 +4880,8 @@ Global Symbols
 <LI><a href="#[28f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_buf_rotate
 <LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_polygon
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_img_decoded
+<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
+<LI><a href="#[480]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_blur_corner
 <LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[274]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bg
 <LI><a href="#[2a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_line_ver
@@ -4888,8 +4890,6 @@ Global Symbols
 <LI><a href="#[2a1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_letter_normal
 <LI><a href="#[265]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;decode_and_draw
 <LI><a href="#[28b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border_generic
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
-<LI><a href="#[480]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_blur_corner
 <LI><a href="#[379]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_img_decoder_built_in_line_indexed
 <LI><a href="#[376]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_img_decoder_built_in_line_alpha
 <LI><a href="#[25b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;circ_calc_aa4
@@ -4965,11 +4965,11 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[228]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_anim_start
 <LI><a href="#[29f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_obj_init_draw_rect_dsc
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_buffer_copy
+<LI><a href="#[480]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_blur_corner
 <LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[260]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;convert_cb
 <LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;kill_oldest_item
 <LI><a href="#[360]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;map_normal
-<LI><a href="#[480]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_blur_corner
 <LI><a href="#[39a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_tlsf_realloc
 <LI><a href="#[36f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_fs_read_cached
 <LI><a href="#[38c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_label_refr_text
@@ -5008,6 +5008,7 @@ Global Symbols
 <LI><a href="#[a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_layer_adjust
 <LI><a href="#[9b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_img_decoded
 <LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_init_ctx
+<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 <LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[28c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border_simple
 <LI><a href="#[2a4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_mask_line_points_init
@@ -5021,7 +5022,6 @@ Global Symbols
 <LI><a href="#[1f2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_lv_img_cache_open
 <LI><a href="#[286]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_label_dsc_init
 <LI><a href="#[28b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border_generic
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 <LI><a href="#[36c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_fs_open
 <LI><a href="#[1f5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_img_decoder_create
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_img_decoder_built_in_open
@@ -5035,14 +5035,14 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[262]"></a>lv_memset_ff</STRONG> (Thumb, 96 bytes, Stack size 0 bytes, lv_mem.o(i.lv_memset_ff))
-<BR><BR>[Called By]<UL><LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
+<BR><BR>[Called By]<UL><LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
+<LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[2a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_line_ver
 <LI><a href="#[2a3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_line_skew
 <LI><a href="#[2a2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_line_hor
 <LI><a href="#[260]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;convert_cb
 <LI><a href="#[368]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rgb_no_aa
 <LI><a href="#[28b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border_generic
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 </UL>
 
 <P><STRONG><a name="[39b]"></a>lv_obj_add_event_cb</STRONG> (Thumb, 152 bytes, Stack size 24 bytes, lv_event.o(i.lv_obj_add_event_cb))
@@ -7393,8 +7393,8 @@ Global Symbols
 <P><STRONG><a name="[443]"></a>param_area_defaults</STRONG> (Thumb, 54 bytes, Stack size 8 bytes, param_area.o(i.param_area_defaults))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = param_area_defaults &rArr; param_area_crc &rArr; crc32_calc
 </UL>
-<BR>[Calls]<UL><LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
-<LI><a href="#[455]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
+<BR>[Calls]<UL><LI><a href="#[455]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
+<LI><a href="#[16d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memclr4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[1ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_http_phase
 <LI><a href="#[442]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_apply_and_reboot
@@ -7423,11 +7423,11 @@ Global Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 552<LI>Call Chain = param_area_save &rArr; slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_read
+<LI><a href="#[455]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
 <LI><a href="#[457]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;slot_load
 <LI><a href="#[2dc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_write
 <LI><a href="#[2d6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_erase_addr
 <LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
-<LI><a href="#[455]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
 </UL>
 <BR>[Called By]<UL><LI><a href="#[44f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_manual_rollback
 <LI><a href="#[44e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_manual_recovery
@@ -8345,7 +8345,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[1ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ota_http_phase
 </UL>
 
-<P><STRONG><a name="[445]"></a>ota_do_download</STRONG> (Thumb, 1484 bytes, Stack size 2304 bytes, ota.o(i.ota_do_download))
+<P><STRONG><a name="[445]"></a>ota_do_download</STRONG> (Thumb, 1500 bytes, Stack size 2304 bytes, ota.o(i.ota_do_download))
 <BR><BR>[Stack]<UL><LI>Max Depth = 5256 + Unknown Stack Size
 <LI>Call Chain = ota_do_download &rArr; ota_api_report_status &rArr; http_client_request &rArr; http_client_request_once &rArr; esp01s_tcp_connect &rArr; esp01s_at_cmd &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
@@ -10323,11 +10323,11 @@ Local Symbols
 <LI><a href="#[282]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_img_decoder_get_info
 <LI><a href="#[288]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_img_dsc_init
 <LI><a href="#[289]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_img
+<LI><a href="#[284]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_width
+<LI><a href="#[285]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_height
 <LI><a href="#[283]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_txt_get_size
 <LI><a href="#[286]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_label_dsc_init
 <LI><a href="#[287]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_label
-<LI><a href="#[284]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_width
-<LI><a href="#[285]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_height
 </UL>
 <BR>[Called By]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_rect
 <LI><a href="#[99]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_bg
@@ -10374,6 +10374,9 @@ Local Symbols
 <LI><a href="#[2b5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_increase
 <LI><a href="#[212]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_lv_area_intersect
 <LI><a href="#[27d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_mask_remove_id
+<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
+<LI><a href="#[284]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_width
+<LI><a href="#[285]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_height
 <LI><a href="#[275]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_copy
 <LI><a href="#[262]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_memset_ff
 <LI><a href="#[276]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_mask_is_any
@@ -10381,31 +10384,28 @@ Local Symbols
 <LI><a href="#[27a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_blend
 <LI><a href="#[27b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_memset
 <LI><a href="#[1de]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_lv_area_is_out
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
-<LI><a href="#[284]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_width
-<LI><a href="#[285]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_height
 </UL>
 <BR>[Called By]<UL><LI><a href="#[98]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_sw_rect
 </UL>
 
 <P><STRONG><a name="[275]"></a>lv_area_copy</STRONG> (Thumb, 18 bytes, Stack size 0 bytes, lv_draw_sw_rect.o(i.lv_area_copy))
-<BR><BR>[Called By]<UL><LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
+<BR><BR>[Called By]<UL><LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
+<LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[2ab]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_outline
 <LI><a href="#[28a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_border
 <LI><a href="#[274]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bg
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 </UL>
 
 <P><STRONG><a name="[285]"></a>lv_area_get_height</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, lv_draw_sw_rect.o(i.lv_area_get_height))
-<BR><BR>[Called By]<UL><LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
+<BR><BR>[Called By]<UL><LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
+<LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[280]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bg_img
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 </UL>
 
 <P><STRONG><a name="[284]"></a>lv_area_get_width</STRONG> (Thumb, 12 bytes, Stack size 0 bytes, lv_draw_sw_rect.o(i.lv_area_get_width))
-<BR><BR>[Called By]<UL><LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
+<BR><BR>[Called By]<UL><LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
+<LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 <LI><a href="#[280]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_bg_img
-<LI><a href="#[2b6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_draw_corner_buf
 </UL>
 
 <P><STRONG><a name="[480]"></a>shadow_blur_corner</STRONG> (Thumb, 304 bytes, Stack size 40 bytes, lv_draw_sw_rect.o(i.shadow_blur_corner))
@@ -10426,11 +10426,11 @@ Local Symbols
 <LI><a href="#[25c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_mem_buf_get
 <LI><a href="#[277]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_mask_radius_init
 <LI><a href="#[27e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_draw_mask_free_param
-<LI><a href="#[275]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_copy
-<LI><a href="#[262]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_memset_ff
 <LI><a href="#[480]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;shadow_blur_corner
 <LI><a href="#[284]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_width
 <LI><a href="#[285]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_get_height
+<LI><a href="#[275]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_area_copy
+<LI><a href="#[262]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lv_memset_ff
 </UL>
 <BR>[Called By]<UL><LI><a href="#[2b4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;draw_shadow
 </UL>
@@ -11634,8 +11634,8 @@ Local Symbols
 <BR><BR>[Stack]<UL><LI>Max Depth = 200<LI>Call Chain = slot_load &rArr; param_area_crc &rArr; crc32_calc
 </UL>
 <BR>[Calls]<UL><LI><a href="#[2db]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;flash_if_read
-<LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 <LI><a href="#[455]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_crc
+<LI><a href="#[123]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
 <BR>[Called By]<UL><LI><a href="#[273]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_save
 <LI><a href="#[1b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;param_area_load

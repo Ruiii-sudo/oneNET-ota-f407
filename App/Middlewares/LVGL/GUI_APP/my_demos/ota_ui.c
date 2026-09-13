@@ -501,6 +501,7 @@ void ota_ui_refresh(void)
     case OTA_STATE_CONNECTING:
     case OTA_STATE_WAIT_NOTIFY:
     case OTA_STATE_CHECKING:
+	case OTA_STATE_TESTING:
         lv_label_set_text(s_ring_val, "...");
         break;
     case OTA_STATE_ERROR:
