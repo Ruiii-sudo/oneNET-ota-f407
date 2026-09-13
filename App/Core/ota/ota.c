@@ -809,23 +809,34 @@ static int ota_do_download(const ota_task_t *task)
     s_status.state = OTA_STATE_VERIFYING;
     snprintf(s_status.msg, sizeof(s_status.msg), "backup old fw...");
 
-    /* 先读参数区，拿到旧固件大小（用于备份和记录 backup_len） */
+    /* 先读参数区，拿到旧固件版本号（用于记录 backup_version） */
     ota_param_t old_param;
     uint32_t old_image_len = 0;
     uint32_t old_version = 0;
     if (param_area_load(&old_param) == 0)
     {
-        old_image_len = old_param.image_len;
         old_version = old_param.version;
     }
 
-    /* 旧固件大小无效的话，用整个 A 槽大小 */
-    if (old_image_len == 0 || old_image_len > OTA_APP_IMAGE_MAX_SIZE)
+    /* 从 A 槽末尾反向探测实际固件大小（与恢复区初始化一致），4KB 对齐 */
+    old_image_len = OTA_APP_IMAGE_MAX_SIZE;
     {
-        old_image_len = OTA_APP_IMAGE_MAX_SIZE;
+        uint8_t chk;
+        for (int32_t off = (int32_t)OTA_APP_IMAGE_MAX_SIZE - 1; off >= 0; off--)
+        {
+            flash_if_read(OTA_APP_A_ADDR + off, &chk, 1);
+            if (chk != 0xFF)
+            {
+                old_image_len = (uint32_t)off + 1;
+                break;
+            }
+            ota_feed_watchdog();
+        }
     }
+    old_image_len = (old_image_len + 0xFFFU) & ~0xFFFU;
+    if (old_image_len > OTA_APP_IMAGE_MAX_SIZE) old_image_len = OTA_APP_IMAGE_MAX_SIZE;
 
-    /* 擦除外部备份区 */
+    /* 擦除外部备份区（整区全擦：与恢复区初始化一致，保证备份区绝对干净） */
     for (uint32_t off = 0; off < OTA_APP_IMAGE_MAX_SIZE; off += 65536)
     {
         w25q16_erase_block(EXT_BACKUP_ADDR + off);

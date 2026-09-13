@@ -37,3 +37,4 @@ __pycache__/
 # 例外：OTA 更新包目录
 !Update\ pack/
 !Update\ pack/*.bin
+
