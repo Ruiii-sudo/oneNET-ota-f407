@@ -103,7 +103,7 @@ flowchart TD
 
 ## 界面展示（LVGL）
 
-|<img width="400" alt="微信图片_20260913233041_25_1" src="https://github.com/user-attachments/assets/b9a99340-52b2-48f2-938e-a4dfc9d56299" />|<img width="390" alt="微信图片_20260913233041_26_1" src="https://github.com/user-attachments/assets/2165f3c6-eff8-444c-91c7-709a41294914" />
+|<img width="300" alt="微信图片_20260913233041_25_1" src="https://github.com/user-attachments/assets/b9a99340-52b2-48f2-938e-a4dfc9d56299" />|<img width="290" alt="微信图片_20260913233041_26_1" src="https://github.com/user-attachments/assets/2165f3c6-eff8-444c-91c7-709a41294914" />
 |
 
 
@@ -148,6 +148,9 @@ flowchart TD
 2. 按 OneNET 规则生成 MQTT 接入 token，填入 `App/Core/ota/ota_config.h` 的 `OTA_MQTT_USER / OTA_MQTT_PASS / OTA_DEVICE_ID`；
 3. 平台开通「增值服务 → OTA 升级」，上传 bin 固件升级包（版本号需与 `OTA_APP_VERSION_STR` 一致）；
 4. 创建设备升级任务，设备侧 MQTT 通知或轮询即可感知。
+
+<img width="1200"  alt="image" src="https://github.com/user-attachments/assets/e0067150-e580-44d9-b022-4be10fbb2d4c" />
+
 
 ### 3. 发布新固件
 
