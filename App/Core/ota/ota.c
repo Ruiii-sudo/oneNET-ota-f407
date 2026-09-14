@@ -46,6 +46,8 @@ static IWDG_HandleTypeDef s_iwdg = {.Instance = IWDG};
 /* ---- 状态快照 ---- */
 static ota_status_t s_status;
 static volatile uint32_t s_check_requested = 0;   /* UI 手动触发检查 */
+static volatile int    s_confirm_update = 0;         /* 0=未决定 1=YES 2=NO */
+static volatile uint8_t s_skip_check = 0;            /* NO后跳过下一轮强制检测的标志 */
 static volatile int    s_abort_report = 0;        /* 下载中触发进度上报（截断当前连接） */
 static volatile uint32_t s_inform_received = 0;   /* 收到平台 OTA 通知 */
 
@@ -59,6 +61,8 @@ typedef struct {
     char     md5[40];      /* 升级包 MD5（小写十六进制 32 字符） */
     int      has_task;
 } ota_task_t;
+
+static ota_task_t      s_pending_task;               /* 检测到但待用户确认的升级任务 */
 
 /* ---- 下载上下文 ---- */
 typedef struct {
@@ -87,6 +91,7 @@ static void dl_on_data(const uint8_t *data, uint32_t len, void *arg);
 static int  ota_do_download(const ota_task_t *task);
 static int  ota_verify_backup_sha(const ota_param_t *p);
 static void ota_apply_and_reboot(uint32_t tid);
+static void ota_execute_update(const ota_task_t *t);
 static void ota_http_phase(void);
 
 /* ================= 看门狗 ================= */
@@ -112,6 +117,12 @@ void ota_get_status(ota_status_t *st)
 void ota_request_check(void)
 {
     s_check_requested = 1;
+}
+
+/* 更新确认（UI 弹窗按钮）：1=立即更新 0=暂不更新 */
+void ota_confirm_update(int yes)
+{
+    s_confirm_update = yes ? 1 : 2;
 }
 
 /* ================= 恢复区初始化 ================= */
@@ -1071,21 +1082,34 @@ static void ota_http_phase(void)
         }
     }
 
+    /* 检测到有效更新：不直接下载。缓存任务并进入"待用户确认"状态，
+       UI 弹窗选择 YES 后由 ota_execute_update() 执行，NO 则进入等待命令 */
+    s_pending_task = t;
+    s_confirm_update = 0;
+    s_status.state = OTA_STATE_CONFIRM_UPDATE;
+    snprintf(s_status.msg, sizeof(s_status.msg), "update v%s, confirm", t.target);
+}
+
+/* 执行更新：已下载过同一任务且备份完整则直接应用，否则全新下载 */
+static void ota_execute_update(const ota_task_t *t)
+{
+    ota_param_t p;
+
     /* 已下载过同一任务且备份完整：校验 SHA 后直接应用，避免重复下载 */
     if (param_area_load(&p) == 0 &&
-        p.dl_tid == t.tid && p.backup_status == OTA_BACKUP_VALID &&
-        p.image_len == t.size && ota_verify_backup_sha(&p) == 0)
+        p.dl_tid == t->tid && p.backup_status == OTA_BACKUP_VALID &&
+        p.image_len == t->size && ota_verify_backup_sha(&p) == 0)
     {
         snprintf(s_status.msg, sizeof(s_status.msg), "image ready, apply");
-        (void)ota_api_report_status(t.tid, 100);   /* 补报下载完成 */
-        ota_apply_and_reboot(t.tid);
+        (void)ota_api_report_status(t->tid, 100);   /* 补报下载完成 */
+        ota_apply_and_reboot(t->tid);
         return;   /* 不返回 */
     }
 
     /* 全新下载 */
-    if (ota_do_download(&t) == 0)
+    if (ota_do_download(t) == 0)
     {
-        ota_apply_and_reboot(t.tid);
+        ota_apply_and_reboot(t->tid);
     }
 }
 
@@ -1194,6 +1218,35 @@ void OTA_Task(void *pvParameters)
             s_status.state = OTA_STATE_CONNECTING;
         }
 
+        /* ---- 更新确认：等待 UI 弹窗用户选择 ---- */
+        if (s_status.state == OTA_STATE_CONFIRM_UPDATE)
+        {
+            if (s_confirm_update == 0)
+            {
+                vTaskDelay(pdMS_TO_TICKS(200));
+                continue;
+            }
+            if (s_confirm_update == 2)
+            {
+                /* 用户选择 NO：本次不更新，进入等待升级指令状态 */
+                s_confirm_update = 0;
+                memset(&s_pending_task, 0, sizeof(s_pending_task));
+				s_skip_check = 1;          /* 标记：下一轮强制检测要跳过 */
+                s_status.state = OTA_STATE_WAIT_NOTIFY;
+                snprintf(s_status.msg, sizeof(s_status.msg), "update canceled, waiting...");
+                continue;
+            }
+            /* 用户选择 YES：开始下载 / 应用 */
+            s_confirm_update = 0;
+            /* 立即切到下载状态：ota_do_download 擦除暂存区要 2~3s，
+               期间若保持 CONFIRM，UI 刷新会把弹窗重新拉出来 */
+            s_status.state = OTA_STATE_DOWNLOADING;
+            snprintf(s_status.msg, sizeof(s_status.msg), "downloading...");
+            ota_execute_update(&s_pending_task);
+            continue;
+
+        }
+
         /* ---- 连接 WiFi ---- */
         if (s_status.state == OTA_STATE_CONNECTING)
         {
@@ -1254,13 +1307,22 @@ void OTA_Task(void *pvParameters)
             snprintf(s_status.msg, sizeof(s_status.msg), "checking...");
         }
 
-        /* ---- HTTP 阶段（此时 MQTT 未连接，ESP 单连接无冲突） ---- */
+         /* ---- HTTP 阶段（此时 MQTT 未连接，ESP 单连接无冲突） ---- */
         if (s_status.state == OTA_STATE_CHECKING || s_status.state == OTA_STATE_WAIT_NOTIFY)
         {
-            s_status.state = OTA_STATE_CHECKING;
-            snprintf(s_status.msg, sizeof(s_status.msg), "checking...");
-            ota_http_phase();
+            if (s_status.state == OTA_STATE_WAIT_NOTIFY && s_skip_check)
+            {
+                /* 刚点过NO：本轮不强制检测，直接进入MQTT等待 */
+                s_skip_check = 0;
+            }
+            else
+            {
+                s_status.state = OTA_STATE_CHECKING;
+                snprintf(s_status.msg, sizeof(s_status.msg), "checking...");
+                ota_http_phase();
+            }
         }
+
 
         /* ---- MQTT 阶段：订阅 inform 通知，等待平台推送 ---- */
         if (s_status.state == OTA_STATE_WAIT_NOTIFY)

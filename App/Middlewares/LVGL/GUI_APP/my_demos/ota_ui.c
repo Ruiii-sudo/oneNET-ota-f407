@@ -40,6 +40,8 @@
   #define TXT_CONNECT    "连接中..."
   #define TXT_WAIT       "等待升级指令"
   #define TXT_CHECKING   "检测中"
+  #define TXT_CONFIRM    "确认更新"
+  #define TXT_CONFIRM_MSG "检测到新版本，是否立即更新？"
   #define TXT_DOWNLOAD   "下载中"
   #define TXT_VERIFY     "校验中"
   #define TXT_TEST       "测试中"
@@ -61,6 +63,8 @@
   #define TXT_CONNECT    "CONNECTING..."
   #define TXT_WAIT       "WAITING CMD"
   #define TXT_CHECKING   "CHECKING"
+  #define TXT_CONFIRM    "UPDATE?"
+  #define TXT_CONFIRM_MSG "New version available. Update now?"
   #define TXT_DOWNLOAD   "DOWNLOADING"
   #define TXT_VERIFY     "VERIFYING"
   #define TXT_TEST       "TESTING"
@@ -99,14 +103,14 @@
 #define C_TXT_DIM   0x94A3B8   /* 次文字 */
 #define C_TRACK     0x334155   /* 进度条轨道/按钮底色 */
 
-/* 各状态对应强调色：IDLE/CONNECT/WAIT/CHECK/DL/VERIFY/TEST/REBOOT/ERR */
+/* 各状态对应强调色：IDLE/CONNECT/WAIT/CHECK/CONFIRM/DL/VERIFY/TEST/REBOOT/ERR */
 static const uint32_t s_state_color[] = {
-    C_TXT_DIM, C_WARN, C_ACCENT, C_WARN, C_ACCENT, 0xC084FC, C_TEST, C_OK, C_ERR
+    C_TXT_DIM, C_WARN, C_ACCENT, C_WARN, C_WARN, C_ACCENT, 0xC084FC, C_TEST, C_OK, C_ERR
 };
 
 /* 各状态标题（与 ota_state_t 顺序一致） */
 static const char *const s_state_txt[] = {
-    TXT_IDLE, TXT_CONNECT, TXT_WAIT, TXT_CHECKING, TXT_DOWNLOAD, TXT_VERIFY, TXT_TEST, TXT_REBOOT, TXT_ERROR
+    TXT_IDLE, TXT_CONNECT, TXT_WAIT, TXT_CHECKING, TXT_CONFIRM, TXT_DOWNLOAD, TXT_VERIFY, TXT_TEST, TXT_REBOOT, TXT_ERROR
 };
 
 /* ================= 对象句柄 ================= */
@@ -117,6 +121,9 @@ static lv_obj_t *s_sub;        /* 副标题（msg/字节） */
 static lv_obj_t *s_bar;        /* 进度条（常驻显示，百分比显示在环中心） */
 static lv_obj_t *s_msg;        /* 底部消息 */
 static lv_obj_t *s_page_about; /* 信息页 */
+static lv_obj_t *s_confirm_win; /* 更新确认弹窗（NULL=未显示） */
+static lv_obj_t *s_confirm_card;  /* 确认弹窗卡片（子对象，动画用） */
+static uint8_t   s_confirm_closing; /* 1=关闭动画进行中，防止打断 */
 static lv_obj_t *s_about_val[6];
 static uint32_t  s_last_state = 99;
 
@@ -175,6 +182,225 @@ static void ota_ui_btn_recovery_cb(lv_event_t *e)
     (void)e;
     ota_manual_recovery();
 }
+
+/* ================= 更新确认弹窗 ================= */
+
+/* ---- 弹窗动画 ---- */
+
+/* 透明度动画回调 */
+static void ota_ui_confirm_anim_opa(void *obj, int32_t v)
+{
+    lv_obj_set_style_opa((lv_obj_t *)obj, (lv_opa_t)v, 0);
+}
+
+/* 缩放动画回调（100=100%） */
+static void ota_ui_confirm_anim_scale(void *obj, int32_t v)
+{
+    lv_obj_set_style_transform_zoom((lv_obj_t *)obj, v, 0);
+}
+
+/* 关闭动画结束：删除遮罩（连卡片一起删）并复位句柄 */
+static void ota_ui_confirm_del_cb(lv_anim_t *a)
+{
+    lv_obj_t *obj = (lv_obj_t *)a->var;
+
+    if (s_confirm_win == obj)
+    {
+        s_confirm_win = NULL;
+    }
+    s_confirm_card = NULL;
+    s_confirm_closing = 0;
+    lv_obj_del(obj);
+}
+
+/* 立即删除弹窗（停止相关动画，防止句柄残留） */
+static void ota_ui_confirm_force_del(void)
+{
+    if (s_confirm_win)
+    {
+        lv_anim_del(s_confirm_win, NULL);
+        lv_obj_del(s_confirm_win);
+    }
+    s_confirm_win = NULL;
+    s_confirm_card = NULL;
+    s_confirm_closing = 0;
+}
+
+/* 启动关闭动画：遮罩淡出 + 卡片淡出缩小，结束后删除 */
+static void ota_ui_confirm_close_anim(void)
+{
+    lv_obj_t *mask = s_confirm_win;
+    lv_anim_t a;
+
+    if (!mask || s_confirm_closing)
+    {
+        return;   /* 无弹窗，或已在关闭动画中 */
+    }
+    s_confirm_closing = 1;
+
+    /* 遮罩淡出（整体） */
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, mask);
+    lv_anim_set_exec_cb(&a, ota_ui_confirm_anim_opa);
+    lv_anim_set_values(&a, LV_OPA_COVER, LV_OPA_TRANSP);
+    lv_anim_set_time(&a, 150);
+    lv_anim_set_path_cb(&a, lv_anim_path_ease_in);
+    lv_anim_set_ready_cb(&a, ota_ui_confirm_del_cb);
+    lv_anim_start(&a);
+
+    /* 卡片淡出 + 缩小 100% -> 80% */
+    if (s_confirm_card)
+    {
+        lv_anim_t c, s;
+
+        lv_anim_init(&c);
+        lv_anim_set_var(&c, s_confirm_card);
+        lv_anim_set_exec_cb(&c, ota_ui_confirm_anim_opa);
+        lv_anim_set_values(&c, LV_OPA_COVER, LV_OPA_TRANSP);
+        lv_anim_set_time(&c, 150);
+        lv_anim_set_path_cb(&c, lv_anim_path_ease_in);
+        lv_anim_start(&c);
+
+        lv_anim_init(&s);
+        lv_anim_set_var(&s, s_confirm_card);
+        lv_anim_set_exec_cb(&s, ota_ui_confirm_anim_scale);
+        lv_anim_set_values(&s, 256, 205);
+        lv_anim_set_time(&s, 150);
+        lv_anim_set_path_cb(&s, lv_anim_path_ease_in);
+        lv_anim_start(&s);
+    }
+}
+
+static void ota_ui_confirm_yes_cb(lv_event_t *e)
+{
+    (void)e;
+    ota_confirm_update(1);
+    ota_ui_confirm_close_anim();   /* 动画关闭，状态切走后弹窗自然消失 */
+}
+
+static void ota_ui_confirm_no_cb(lv_event_t *e)
+{
+    (void)e;
+    ota_confirm_update(0);
+    ota_ui_confirm_close_anim();
+}
+
+/* 创建更新确认弹窗（全屏遮罩 + 卡片 + YES/NO） */
+static void ota_ui_confirm_show(void)
+{
+    lv_obj_t *scr, *mask, *card, *lbl, *btn;
+
+    if (s_confirm_win)
+    {
+        return;   /* 已在显示 */
+    }
+
+    scr = lv_scr_act();
+
+    /* 全屏遮罩 */
+    mask = lv_obj_create(scr);
+    lv_obj_set_size(mask, LV_HOR_RES, LV_VER_RES);
+    lv_obj_align(mask, LV_ALIGN_TOP_LEFT, 0, 0);
+    lv_obj_set_style_bg_color(mask, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_opa(mask, LV_OPA_50, 0);
+	lv_obj_set_style_opa(mask, LV_OPA_TRANSP, 0);   /* 初始透明，用于淡入动画 */
+    lv_obj_set_style_border_width(mask, 0, 0);
+    lv_obj_set_style_radius(mask, 0, 0);
+    lv_obj_set_style_pad_all(mask, 0, 0);
+    lv_obj_clear_flag(mask, LV_OBJ_FLAG_SCROLLABLE);
+
+    /* 卡片 */
+    card = lv_obj_create(mask);
+    lv_obj_set_size(card, 204, 132);
+    lv_obj_align(card, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_bg_color(card, lv_color_hex(C_CARD), 0);
+    lv_obj_set_style_radius(card, 10, 0);
+    lv_obj_set_style_shadow_width(card, 14, 0);
+	lv_obj_set_style_opa(card, LV_OPA_TRANSP, 0);     /* 初始透明，用于淡入动画 */
+    lv_obj_set_style_transform_zoom(card, 205, 0);   /* 初始 80% */
+    lv_obj_set_style_transform_pivot_x(card, 102, 0); /* 以卡片中心为缩放锚点 */
+    lv_obj_set_style_transform_pivot_y(card, 66, 0);
+
+
+    /* 标题 */
+    lbl = lv_label_create(card);
+    lv_label_set_text(lbl, TXT_CONFIRM);
+    lv_obj_set_style_text_color(lbl, lv_color_hex(C_ACCENT), 0);
+    lv_obj_set_style_text_font(lbl, F_TITLE, 0);
+    lv_obj_align(lbl, LV_ALIGN_TOP_MID, 0, 3);
+
+    /* 内容 */
+    lbl = lv_label_create(card);
+    lv_label_set_text(lbl, TXT_CONFIRM_MSG);
+    lv_obj_set_width(lbl, 180);
+    lv_label_set_long_mode(lbl, LV_LABEL_LONG_WRAP);
+    lv_obj_set_style_text_color(lbl, lv_color_hex(C_TXT_DIM), 0);
+    lv_obj_set_style_text_font(lbl, F_SMALL, 0);
+	lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_CENTER, 0); 
+    lv_obj_align(lbl, LV_ALIGN_CENTER, 0, -8);
+
+    /* YES */
+    btn = lv_btn_create(card);
+    lv_obj_set_size(btn, 65, 25);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_RIGHT, -6, -7);
+    lv_obj_set_style_bg_color(btn, lv_color_hex(C_OK), 0);
+    lv_obj_set_style_radius(btn, 6, 0);
+    lv_obj_set_style_shadow_width(btn, 0, 0);
+    lbl = lv_label_create(btn);
+    lv_label_set_text(lbl, "YES");
+    lv_obj_set_style_text_color(lbl, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_text_font(lbl, F_BODY, 0);
+    lv_obj_center(lbl);
+    lv_obj_add_event_cb(btn, ota_ui_confirm_yes_cb, LV_EVENT_CLICKED, NULL);
+
+    /* NO */
+    btn = lv_btn_create(card);
+    lv_obj_set_size(btn, 65, 25);
+    lv_obj_align(btn, LV_ALIGN_BOTTOM_LEFT, 6, -7);
+    lv_obj_set_style_bg_color(btn, lv_color_hex(C_TRACK), 0);
+    lv_obj_set_style_radius(btn, 6, 0);
+    lv_obj_set_style_shadow_width(btn, 0, 0);
+    lbl = lv_label_create(btn);
+    lv_label_set_text(lbl, "NO");
+    lv_obj_set_style_text_color(lbl, lv_color_hex(C_TXT), 0);
+    lv_obj_set_style_text_font(lbl, F_BODY, 0);
+    lv_obj_center(lbl);
+    lv_obj_add_event_cb(btn, ota_ui_confirm_no_cb, LV_EVENT_CLICKED, NULL);
+
+    s_confirm_win = mask;
+    s_confirm_card = card;
+    s_confirm_closing = 0;
+
+    /* 显示动画：遮罩淡入 + 卡片淡入放大 */
+    {
+        lv_anim_t a, c, s;
+
+        lv_anim_init(&a);
+        lv_anim_set_var(&a, mask);
+        lv_anim_set_exec_cb(&a, ota_ui_confirm_anim_opa);
+        lv_anim_set_values(&a, LV_OPA_TRANSP, LV_OPA_COVER);
+        lv_anim_set_time(&a, 150);
+        lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
+        lv_anim_start(&a);
+
+        lv_anim_init(&c);
+        lv_anim_set_var(&c, card);
+        lv_anim_set_exec_cb(&c, ota_ui_confirm_anim_opa);
+        lv_anim_set_values(&c, LV_OPA_TRANSP, LV_OPA_COVER);
+        lv_anim_set_time(&c, 200);
+        lv_anim_set_path_cb(&c, lv_anim_path_ease_out);
+        lv_anim_start(&c);
+
+        lv_anim_init(&s);
+        lv_anim_set_var(&s, card);
+        lv_anim_set_exec_cb(&s, ota_ui_confirm_anim_scale);
+        lv_anim_set_values(&s, 205, 256);
+        lv_anim_set_time(&s, 200);
+        lv_anim_set_path_cb(&s, lv_anim_path_ease_out);
+        lv_anim_start(&s);
+    }
+}
+
 
 /* ================= 对象创建 ================= */
 
@@ -504,6 +730,9 @@ void ota_ui_refresh(void)
 	case OTA_STATE_TESTING:
         lv_label_set_text(s_ring_val, "...");
         break;
+    case OTA_STATE_CONFIRM_UPDATE:
+        lv_label_set_text(s_ring_val, "?");
+        break;
     case OTA_STATE_ERROR:
         lv_label_set_text(s_ring_val, "!");
         break;
@@ -540,6 +769,17 @@ void ota_ui_refresh(void)
         lv_label_set_text(s_msg, st.msg);
     }
 	
+    /* 更新确认弹窗：进入确认状态时弹出，离开后销毁 */
+    if (st.state == OTA_STATE_CONFIRM_UPDATE)
+    {
+        ota_ui_confirm_show();
+    }
+    else if (s_confirm_win && !s_confirm_closing)
+    {
+        ota_ui_confirm_force_del();   /* 非动画期间离开确认态：立即删除 */
+    }
+
+
 	{
         ota_param_t ap;
         static uint32_t s_prev_ver  = 0xFFFFFFFF;

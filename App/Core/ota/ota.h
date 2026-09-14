@@ -19,6 +19,7 @@ typedef enum {
     OTA_STATE_CONNECTING,      /* 连接 WiFi/Broker */
     OTA_STATE_WAIT_NOTIFY,     /* 等待服务器下发升级通知（MQTT inform） */
     OTA_STATE_CHECKING,        /* 检测升级任务（HTTP check） */
+    OTA_STATE_CONFIRM_UPDATE,  /* 检测到更新，等待用户确认（UI 弹窗） */
     OTA_STATE_DOWNLOADING,     /* 下载固件 */
     OTA_STATE_VERIFYING,       /* MD5/SHA-256 校验 */
     OTA_STATE_TESTING,         /* 新固件静默测试中 */
@@ -41,6 +42,9 @@ void OTA_Task(void *pvParameters);
 
 /* 手动请求立即检查一次升级（供 UI 按钮调用） */
 void ota_request_check(void);
+
+/* 更新确认（UI 弹窗按钮）：1=立即更新 0=暂不更新 */
+void ota_confirm_update(int yes);
 
 /* 手动回滚到上一版本（供 UI 按钮调用） */
 void ota_manual_rollback(void);
