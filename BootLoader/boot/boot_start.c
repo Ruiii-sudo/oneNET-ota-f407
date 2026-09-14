@@ -76,7 +76,15 @@ void boot_run(void)
         else
         {
             USART1_Printf("[BL] rollback FAILED, try recovery\r\n");
-            boot_recover_from_recovery(&param);
+            /* [FIX] 恢复失败必须停止跳转：A 槽仍无效，继续 jump 会死机无限重启 */
+            if (boot_recover_from_recovery(&param) != 0)
+            {
+                USART1_Printf("[BL] recovery FAILED, system halted!\r\n");
+                while (1)
+                {
+                    HAL_IWDG_Refresh(&hiwdg);
+                }
+            }
         }
         param.boot_flag = OTA_BOOT_FLAG_NORMAL;
         param.boot_count = 0;
@@ -179,7 +187,15 @@ void boot_run(void)
     if (app_jump_validate(app_addr) != 0)
     {
         USART1_Printf("[BL] app A invalid, try recovery!\r\n");
-        boot_recover_from_recovery(&param);
+        /* [FIX] 恢复失败必须停止跳转：A 槽仍无效，继续 jump 会死机无限重启 */
+        if (boot_recover_from_recovery(&param) != 0)
+        {
+            USART1_Printf("[BL] recovery FAILED, system halted!\r\n");
+            while (1)
+            {
+                HAL_IWDG_Refresh(&hiwdg);
+            }
+        }
     }
 
     /* ---- 5. jump ---- */
