@@ -1,7 +1,8 @@
 # STM32F407 OneNET OTA 远程升级系统
 
 基于 **STM32F407VET6 + ESP-01S + W25Q16** 的云 OTA 远程升级演示工程，通过 **OneNET 云平台** 实现固件远程升级，带 **LVGL 图形界面**，完整支持双校验、断点续传、崩溃自动回滚、手动回滚与恢复出厂。
-视频链接：https://www.bilibili.com/video/BV14zeW6YEJj/?spm_id_from=333.1391.0.0&vd_source=a92656360efdb9a9c214b17b13c63a0d
+
+视频链接：https://www.bilibili.com/video/BV14zeW6YEJj/
 
 ## 功能特性
 
