@@ -637,6 +637,20 @@ static int ota_do_download(const ota_task_t *task)
     {
         c.offset = p.resume_offset;
         c.last_save = c.offset;
+		
+		/* [FIX] 断电续传：MD5/SHA-256 上下文无法跨断电保存，必须重扫暂存区 0~offset 已下载数据补进哈希，
+           否则哈希只含续传后的半截数据，MD5/SHA 校验必然失败 */
+		uint32_t done = 0;
+		uint8_t hbuf[256];
+		while (done < c.offset)
+		{
+			uint32_t take = ((c.offset - done) > sizeof(hbuf)) ? (uint32_t)sizeof(hbuf) : (c.offset - done);
+			w25q16_read(EXT_STAGING_ADDR + done, hbuf, take);
+			sha256_update(&c.sha, hbuf, take);
+			md5_update(&c.md5, hbuf, take);
+			done += take;
+			ota_feed_watchdog();
+		}
     }
 
     s_status.state = OTA_STATE_DOWNLOADING;
@@ -729,10 +743,11 @@ static int ota_do_download(const ota_task_t *task)
             if (attempt < 31 && start_offset > 0 &&
                 resp.status_code == HTTP_STATUS_OK && c.offset == start_offset)
             {
-                if (flash_if_erase_region(c.backup_addr, OTA_APP_IMAGE_MAX_SIZE) != HAL_OK)
-                {
-                    return -1;
-                }
+				for (uint32_t off = 0; off < OTA_APP_IMAGE_MAX_SIZE; off += 65536)
+				{
+					w25q16_erase_block(EXT_STAGING_ADDR + off);
+					ota_feed_watchdog();
+				}
                 c.offset = 0;
                 c.last_save = 0;
                 if (param_area_load(&p) == 0)
